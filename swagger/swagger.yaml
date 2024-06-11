@@ -1,0 +1,308 @@
+openapi: 3.0.0
+info:
+  title: GO DAO
+  version: 1.0.0
+paths:
+  /dao-team-vote-results:
+    get:
+      summary: Get Actual Vote Results
+      description: Подводит итоги голосования по кошельку DAO.
+      tags:
+        - DAO Team Votes
+      responses:
+        '200':
+          description: Список результатов голосования
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DAOTeamVoteResultsResponse'
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /votes:
+    post:
+      summary: Create a new vote
+      description: Создает новое пользовательское голосование.
+      tags:
+        - User Votes
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VoteWithoutID'
+      responses:
+        '201':
+          description: Голосование создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vote'
+        '400':
+          description: Неверный ввод
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /votes/{id}:
+    get:
+      summary: Get a vote by ID
+      description: Получает новое пользовательское голосование по ID.
+      tags:
+        - User Votes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Голосование
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vote'
+        '404':
+          description: Голосование не найдено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+    delete:
+      summary: Delete a vote by ID
+      description: Удаляет новое пользовательское голосование по ID.
+      tags:
+        - User Votes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Голосование удалено
+        '404':
+          description: Голосование не найдено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /votes/{id}/vote:
+    post:
+      summary: Add a user vote
+      description: Добавляет голос пользователя к голосованию.
+      tags:
+        - User Votes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserVoteInput'
+      responses:
+        '201':
+          description: Голос пользователя добавлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserVote'
+        '400':
+          description: Неверный ввод
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /votes/{id}/votes:
+    get:
+      summary: Get all user votes for a vote
+      description: Получает все голоса пользователей для указанного голосования.
+      tags:
+        - User Votes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список голосов пользователей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserVote'
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+components:
+  schemas:
+    DAOTeamVote:
+      type: object
+      properties:
+        message:
+          type: string
+        from:
+          type: string
+        vote_power:
+          type: integer
+    DAOTeamVoteResultsResponse:
+      type: object
+      properties:
+        dao_members:
+          type: integer
+        voted_members:
+          type: integer
+        turnout:
+          type: string
+        votes_for:
+          type: string
+        votes_against:
+          type: string
+        voting_status:
+          type: string
+        resolution:
+          type: string
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/DAOTeamVote'
+    Vote:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        subtitle:
+          type: string
+        description:
+          type: string
+        voter:
+          type: string
+        choice:
+          type: string
+          enum: ["За", "Против"]
+        vote_power:
+          type: integer
+    VoteWithoutID:
+      type: object
+      required:
+        - title
+        - subtitle
+        - description
+        - voter
+        - choice
+      properties:
+        title:
+          type: string
+          example: "Sample Title"
+        subtitle:
+          type: string
+          example: "Sample Subtitle"
+        description:
+          type: string
+          example: "Sample Description"
+        voter:
+          type: string
+          example: "d0"
+        choice:
+          type: string
+          enum: ["За", "Против"]
+          example: "За"
+    UserVote:
+      type: object
+      properties:
+        id:
+          type: integer
+        vote_id:
+          type: integer
+        voter:
+          type: string
+        choice:
+          type: string
+          enum: ["За", "Против"]
+        vote_power:
+          type: integer
+    UserVoteInput:
+      type: object
+      required:
+        - voter
+        - choice
+      properties:
+        voter:
+          type: string
+          example: "d0..."
+        choice:
+          type: string
+          enum: ["За", "Против"]
+          example: "За"
