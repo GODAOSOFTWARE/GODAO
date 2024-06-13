@@ -68,7 +68,7 @@ var voteMap = map[string]int{
 }
 
 // totalVoices представляет общее количество голосов
-var totalVoices = 12876984
+var totalVoices = 12876983
 
 // GetVoteStrength возвращает силу голоса для указанного кошелька
 func GetVoteStrength(from string) (int, error) {
