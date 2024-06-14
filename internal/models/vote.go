@@ -32,6 +32,7 @@ type Transaction struct {
 	From      string `json:"from"`
 	Message   string `json:"message"`
 	VotePower int    `json:"vote_power"`
+	Hash      string `json:"hash"` // Добавлено поле для хэша транзакции
 }
 
 // DAOTeamVoteResultsResponse представляет обработанные результаты голосования команды DAO.

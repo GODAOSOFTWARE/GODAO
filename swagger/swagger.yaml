@@ -215,6 +215,8 @@ components:
           type: string
         vote_power:
           type: integer
+        hash:
+          type: string # Добавлено поле для хэша транзакции
     DAOTeamVoteResultsResponse:
       type: object
       properties:

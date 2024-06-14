@@ -51,6 +51,7 @@ func FetchDAOTeamVoteResults() (models.DAOTeamApiResponse, error) {
 			fmt.Printf("Error getting vote strength for %s: %v\n", result.From, err)
 		}
 		apiResponse.Result.Txs[i].VotePower = votePower
+		apiResponse.Result.Txs[i].Hash = result.Hash // Добавляем хэш транзакции
 	}
 
 	return apiResponse, nil
