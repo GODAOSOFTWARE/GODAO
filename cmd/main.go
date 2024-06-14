@@ -3,7 +3,7 @@ package main
 import (
 	"dao_vote/internal/handlers"
 	"github.com/gin-gonic/gin"
-	"log"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 )
@@ -11,22 +11,24 @@ import (
 func main() {
 	r := gin.Default()
 
-	// Подключаем маршруты для голосования команды DAO
+	// Middleware для логирования запросов
+	r.Use(requestLogger())
+
+	// Маршруты для голосования команды DAO
 	r.GET("/dao-team-vote-results", handlers.GetDAOTeamVoteResults)
 
-	// Подключаем маршруты для пользовательских голосований
+	// Маршруты для пользовательских голосований
 	r.POST("/votes", handlers.CreateVoteHandler)
 	r.GET("/votes/:id", handlers.GetVoteHandler)
 	r.DELETE("/votes/:id", handlers.DeleteVoteHandler)
 	r.POST("/votes/:id/vote", handlers.AddUserVoteHandler)
 	r.GET("/votes/:id/votes", handlers.GetUserVotesHandler)
 
-	// Подключаем маршруты для авторизации
+	// Маршруты для авторизации
 	r.POST("/auth/login", handlers.UserLoginHandler)
 	r.GET("/auth/me", handlers.UserMeHandler)
-	r.GET("/auth/user/:id", handlers.GetUserByIDHandler) // Новый маршрут
 
-	// Подключаем маршруты для Swagger
+	// Маршруты для Swagger
 	r.StaticFS("/swagger", http.Dir("./swagger"))
 
 	// Получаем порт из переменной окружения, если не указан, используем 8080
@@ -37,6 +39,17 @@ func main() {
 
 	// Запускаем сервер
 	if err := r.Run(":" + port); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+		logrus.Fatalf("Не удалось запустить сервер: %v", err)
+	}
+}
+
+// requestLogger - это функция middleware, которая логирует детали каждого запроса.
+func requestLogger() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		logrus.WithFields(logrus.Fields{
+			"method": c.Request.Method,
+			"path":   c.Request.URL.Path,
+		}).Info("Входящий запрос")
+		c.Next()
 	}
 }
