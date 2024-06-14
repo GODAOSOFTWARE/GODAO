@@ -17,7 +17,7 @@ const (
 	percentFactor            = 100 // Фактор для расчета процентов
 )
 
-// FetchDAOTeamVoteResults - функция для получения результатов голосования команды DAO
+// FetchDAOTeamVoteResults - функция для получения результатов голосования по адресу кошелька DAO
 func FetchDAOTeamVoteResults() (models.DAOTeamApiResponse, error) {
 	// Выполняет GET-запрос к API для получения транзакций голосования
 	resp, err := http.Get(daoTeamVoteResultsAPIURL)

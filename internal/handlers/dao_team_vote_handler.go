@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// GetDAOTeamVoteResults обрабатывает GET /dao-team-vote-results запрос для получения результатов голосования команды DAO
+// GetDAOTeamVoteResults обрабатывает GET /dao-team-vote-results запрос
 func GetDAOTeamVoteResults(c *gin.Context) {
 	// Вызов сервиса для получения результатов голосования команды DAO
 	apiResponse, err := services.FetchDAOTeamVoteResults()
