@@ -15,11 +15,14 @@ func main() {
 	r.GET("/dao-team-vote-results", handlers.GetDAOTeamVoteResults)
 
 	// Подключаем маршруты для пользовательских голосований
-	r.POST("/votes", handlers.CreateVoteHandler)            //Cоздает голосование пользователей
-	r.GET("/votes/:id", handlers.GetVoteHandler)            //Получает информацию о голосвании по ID
-	r.DELETE("/votes/:id", handlers.DeleteVoteHandler)      //Удаляет голосование по ID
-	r.POST("/votes/:id/vote", handlers.AddUserVoteHandler)  // Создает голос пользователя в голосовании
-	r.GET("/votes/:id/votes", handlers.GetUserVotesHandler) // Получает голоса пользователей по ID голосования
+	r.POST("/votes", handlers.CreateVoteHandler)
+	r.GET("/votes/:id", handlers.GetVoteHandler)
+	r.DELETE("/votes/:id", handlers.DeleteVoteHandler)
+	r.POST("/votes/:id/vote", handlers.AddUserVoteHandler)
+	r.GET("/votes/:id/votes", handlers.GetUserVotesHandler)
+
+	// Подключаем маршруты для авторизации
+	r.POST("/auth/login", handlers.UserLoginHandler) // Добавлено
 
 	// Подключаем маршруты для Swagger
 	r.StaticFS("/swagger", http.Dir("./swagger"))

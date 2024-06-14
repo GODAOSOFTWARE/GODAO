@@ -204,6 +204,43 @@ paths:
                 properties:
                   error:
                     type: string
+  /auth/login:
+    post:
+      summary: User Login
+      description: Авторизация пользователя.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Неверный запрос
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
 components:
   schemas:
     DAOTeamVote:
@@ -222,8 +259,8 @@ components:
       properties:
         dao_members:
           type: integer
-        voted_members:
-          type: integer
+        trx_count:
+          type: integer # Обновлено: Замена поля voted_members на trx_count
         turnout:
           type: string
         votes_for:
@@ -308,3 +345,17 @@ components:
           type: string
           enum: ["За", "Против"]
           example: "За"
+    AuthRequest:
+      type: object
+      properties:
+        login:
+          type: string
+        password:
+          type: string
+        device_name:
+          type: string
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
