@@ -241,7 +241,56 @@ paths:
                 properties:
                   error:
                     type: string
+  /auth/me:
+    get:
+      summary: Get Current User Info
+      description: >
+        Получение информации о текущем пользователе. **Требуется авторизация.** Пример заголовка авторизации:
+        ```
+        Authorization: Bearer {token}
+        ```
+      tags:
+        - Authentication
+      parameters:
+        - name: with_user_information
+          in: query
+          required: true
+          schema:
+            type: boolean
+            example: true
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Информация о пользователе
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Неавторизован
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     DAOTeamVote:
       type: object
@@ -359,3 +408,80 @@ components:
       properties:
         token:
           type: string
+    User:
+      type: object
+      properties:
+        ID:
+          type: integer
+        Login:
+          type: string
+        Email:
+          type: string
+        Phone:
+          type: string
+        Nick:
+          type: string
+        Locale:
+          type: string
+        Avatar:
+          type: string
+        Wallet:
+          type: string
+        Roles:
+          type: array
+          items:
+            type: string
+        Permissions:
+          type: array
+          items:
+            type: string
+        Subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+    Subscription:
+      type: object
+      properties:
+        ID:
+          type: integer
+        Tag:
+          type: string
+        PlanID:
+          type: integer
+        Name:
+          type: string
+        Description:
+          type: string
+        Price:
+          type: number
+          format: float
+        Currency:
+          type: string
+        TrialPeriod:
+          type: integer
+        TrialInterval:
+          type: string
+        GracePeriod:
+          type: integer
+        GraceInterval:
+          type: string
+        InvoicePeriod:
+          type: integer
+        InvoiceInterval:
+          type: string
+        Tier:
+          type: integer
+        StartsAt:
+          type: string
+          format: date-time
+        EndsAt:
+          type: string
+          format: date-time
+        CreatedAt:
+          type: string
+          format: date-time
+        UpdatedAt:
+          type: string
+          format: date-time
+security:
+  - BearerAuth: []

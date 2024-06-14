@@ -22,7 +22,9 @@ func main() {
 	r.GET("/votes/:id/votes", handlers.GetUserVotesHandler)
 
 	// Подключаем маршруты для авторизации
-	r.POST("/auth/login", handlers.UserLoginHandler) // Добавлено
+	r.POST("/auth/login", handlers.UserLoginHandler)
+	r.GET("/auth/me", handlers.UserMeHandler)
+	r.GET("/auth/user/:id", handlers.GetUserByIDHandler) // Новый маршрут
 
 	// Подключаем маршруты для Swagger
 	r.StaticFS("/swagger", http.Dir("./swagger"))
