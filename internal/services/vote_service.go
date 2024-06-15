@@ -5,17 +5,17 @@ import (
 	"dao_vote/internal/repository"
 )
 
-// CreateVote создает новое пользовательское голосование и возвращает его VoterID.
+// CreateVote создает новое пользовательское голосование и возвращает его ID.
 func CreateVote(vote models.Vote) (int, error) {
 	return repository.SaveVote(vote)
 }
 
-// GetVote получает пользовательское голосование по VoterID.
+// GetVote получает пользовательское голосование по ID.
 func GetVote(id int) (models.Vote, error) {
 	return repository.GetVoteByID(id)
 }
 
-// DeleteVote удаляет пользовательское голосование по VoterID.
+// DeleteVote удаляет пользовательское голосование по ID.
 func DeleteVote(id int) error {
 	return repository.DeleteVote(id)
 }
@@ -25,7 +25,7 @@ func GetVoteStrength(from string) (int, error) {
 	return repository.GetVoteStrength(from)
 }
 
-// AddUserVote добавляет новый голос пользователя и возвращает его VoterID.
+// AddUserVote добавляет новый голос пользователя и возвращает его ID.
 func AddUserVote(vote models.UserVote) (int, error) {
 	return repository.AddUserVote(vote)
 }
