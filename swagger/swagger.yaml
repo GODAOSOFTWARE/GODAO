@@ -285,6 +285,56 @@ paths:
                 properties:
                   error:
                     type: string
+  /api/v1/withdraw:
+    post:
+      summary: Withdraw Funds
+      description: Снятие средств с указанием суммы и адреса.
+      tags:
+        - Transactions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WithdrawRequest'
+      responses:
+        '200':
+          description: Успешное снятие средств
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Withdrawal successful"
+        '400':
+          description: Неверный запрос
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '401':
+          description: Неавторизован
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
 components:
   securitySchemes:
     BearerAuth:
@@ -483,5 +533,16 @@ components:
         UpdatedAt:
           type: string
           format: date-time
+    WithdrawRequest:
+      type: object
+      required:
+        - amount
+        - address
+      properties:
+        amount:
+          type: number
+          format: float
+        address:
+          type: string
 security:
   - BearerAuth: []

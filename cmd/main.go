@@ -28,6 +28,9 @@ func main() {
 	r.POST("/auth/login", handlers.UserLoginHandler)
 	r.GET("/auth/me", handlers.UserMeHandler)
 
+	// Маршруты для снятия средств
+	r.POST("/api/v1/withdraw", handlers.WithdrawHandler)
+
 	// Маршруты для Swagger
 	r.StaticFS("/swagger", http.Dir("./swagger"))
 
