@@ -2,18 +2,15 @@ package models
 
 // Vote представляет структуру для пользовательского голосования.
 type Vote struct {
-	ID          int    `json:"id"`                              // Уникальный идентификатор голосования
-	Title       string `json:"title" validate:"required"`       // Заголовок голосования
-	Subtitle    string `json:"subtitle" validate:"required"`    // Подзаголовок голосования
-	Description string `json:"description" validate:"required"` // Описание предложения
-	Voter       string `json:"voter" validate:"required"`       // Адрес кошелька, с которого было отправлено голосование
-	Choice      string `json:"choice" validate:"required"`      // Выбранный вариант голосования ("За" или "Против")
-	VotePower   int    `json:"vote_power"`                      // Сила голоса
-
-	// Новые поля для хранения информации о кошельке
-	WalletMnemonic string `json:"wallet_mnemonic"` // Сид фраза (набор слов для восстановления кошелька)
-	WalletAddress  string `json:"wallet_address"`  // Адрес кошелька
-	PublicKey      string `json:"public_key"`      // Публичный ключ
+	ID             int    `json:"id"`                              // Уникальный идентификатор голосования
+	Title          string `json:"title" validate:"required"`       // Заголовок голосования
+	Subtitle       string `json:"subtitle" validate:"required"`    // Подзаголовок голосования
+	Description    string `json:"description" validate:"required"` // Описание предложения
+	Voter          string `json:"voter" validate:"required"`       // Адрес кошелька, с которого было отправлено голосование
+	Choice         string `json:"choice" validate:"required"`      // Выбранный вариант голосования ("За" или "Против")
+	VotePower      int    `json:"vote_power"`                      // Сила голоса
+	WalletAddress  string `json:"wallet_address"`                  // Адрес кошелька
+	MnemonicPhrase string `json:"-"`                               // Мнемоническая фраза, скрыта в JSON-ответах
 }
 
 // VoteWithoutID представляет структуру для пользовательского голосования без VoterID.

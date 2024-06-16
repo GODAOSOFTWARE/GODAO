@@ -10,7 +10,8 @@ require (
 )
 
 require (
-	github.com/99designs/keyring v1.1.6 // indirect
+	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
+	github.com/99designs/keyring v1.2.2 // indirect
 	github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d // indirect
 	github.com/bartekn/go-bip39 v0.0.0-20171116152956-a05967ea095d // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -26,9 +27,9 @@ require (
 	github.com/cosmos/go-bip39 v1.0.0 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.11.1 // indirect
 	github.com/cosmos/ledger-go v0.9.2 // indirect
-	github.com/danieljoos/wincred v1.0.2 // indirect
+	github.com/danieljoos/wincred v1.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/dvsekhvalnov/jose2go v0.0.0-20200901110807-248326c1351b // indirect
+	github.com/dvsekhvalnov/jose2go v1.5.0 // indirect
 	github.com/ethereum/go-ethereum v1.9.11 // indirect
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect

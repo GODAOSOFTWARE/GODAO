@@ -7,6 +7,7 @@ import (
 	"dao_vote/internal/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
 )
@@ -32,23 +33,32 @@ func CreateVoteHandler(c *gin.Context) {
 		return
 	}
 
-	// Генерация нового кошелька с использованием SDK
-	account, err := wallet.NewAccount("")
+	// Генерация новой мнемонической фразы
+	mnemonic, err := wallet.NewMnemonic(256, "")
 	if err != nil {
-		utils.JSONResponse(c, http.StatusInternalServerError, gin.H{"error": "Не удалось создать кошелек"})
+		utils.JSONResponse(c, http.StatusInternalServerError, gin.H{"error": "Не удалось создать мнемоническую фразу"})
 		return
 	}
 
+	// Создание нового аккаунта из мнемонической фразы
+	account, err := wallet.NewAccountFromMnemonic(mnemonic)
+	if err != nil {
+		utils.JSONResponse(c, http.StatusInternalServerError, gin.H{"error": "Не удалось создать аккаунт"})
+		return
+	}
+
+	// Логирование мнемонической фразы и адреса кошелька
+	logrus.Infof("Mnemonic: %s", mnemonic.Words())
+	logrus.Infof("Wallet Address: %s", account.Address())
+
 	// Создаем новый объект голосования с данными о кошельке голосования
 	voteWithID := models.Vote{
-		Title:          vote.Title,
-		Subtitle:       vote.Subtitle,
-		Description:    vote.Description,
-		Voter:          vote.Voter,
-		Choice:         vote.Choice,
-		WalletMnemonic: account.Mnemonic().Words(),   // Сохраняю сид фразу
-		WalletAddress:  account.Address(),            // Сохраняю адрес
-		PublicKey:      account.PublicKey().String(), // Сохраняю публичный ключ
+		Title:         vote.Title,
+		Subtitle:      vote.Subtitle,
+		Description:   vote.Description,
+		Voter:         vote.Voter,
+		Choice:        vote.Choice,
+		WalletAddress: account.Address(),
 	}
 
 	votePower, err := services.GetVoteStrength(vote.Voter)
@@ -65,16 +75,15 @@ func CreateVoteHandler(c *gin.Context) {
 	}
 
 	voteWithID.ID = id
+
 	utils.JSONResponse(c, http.StatusCreated, voteWithID)
 }
 
-//
-
-// GetVoteHandler Получает голосование по VoterID
+// GetVoteHandler получает голосование по ID
 func GetVoteHandler(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		utils.JSONResponse(c, http.StatusBadRequest, gin.H{"error": "invalid VoterID"})
+		utils.JSONResponse(c, http.StatusBadRequest, gin.H{"error": "invalid VoteID"})
 		return
 	}
 
@@ -87,11 +96,11 @@ func GetVoteHandler(c *gin.Context) {
 	utils.JSONResponse(c, http.StatusOK, vote)
 }
 
-// DeleteVoteHandler Создает запрос для удаления голосования от создателя
+// DeleteVoteHandler обрабатывает DELETE /votes/:id запрос для удаления голосования
 func DeleteVoteHandler(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		utils.JSONResponse(c, http.StatusBadRequest, gin.H{"error": "invalid VoterID"})
+		utils.JSONResponse(c, http.StatusBadRequest, gin.H{"error": "invalid VoteID"})
 		return
 	}
 
@@ -103,11 +112,11 @@ func DeleteVoteHandler(c *gin.Context) {
 	utils.JSONResponse(c, http.StatusNoContent, gin.H{})
 }
 
-// AddUserVoteHandler Добавляет голоса пользователя к голосованию
+// AddUserVoteHandler добавляет голос пользователя к голосованию
 func AddUserVoteHandler(c *gin.Context) {
 	voteID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		utils.JSONResponse(c, http.StatusBadRequest, gin.H{"error": "Invalid vote VoterID"})
+		utils.JSONResponse(c, http.StatusBadRequest, gin.H{"error": "Invalid VoteID"})
 		return
 	}
 
@@ -139,7 +148,7 @@ func AddUserVoteHandler(c *gin.Context) {
 func GetUserVotesHandler(c *gin.Context) {
 	voteID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		utils.JSONResponse(c, http.StatusBadRequest, gin.H{"error": "Invalid vote VoterID"})
+		utils.JSONResponse(c, http.StatusBadRequest, gin.H{"error": "Invalid VoteID"})
 		return
 	}
 

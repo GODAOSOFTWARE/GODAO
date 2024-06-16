@@ -5,7 +5,7 @@ info:
 paths:
   /dao-team-vote-results:
     get:
-      summary: Get Actual Vote Results
+      summary: Получить актуальные результаты голосования
       description: Подводит итоги голосования по кошельку DAO.
       tags:
         - DAO Team Votes
@@ -27,7 +27,7 @@ paths:
                     type: string
   /votes:
     post:
-      summary: Create a new vote
+      summary: Создать новое голосование
       description: Создает новое пользовательское голосование.
       tags:
         - User Votes
@@ -64,7 +64,7 @@ paths:
                     type: string
   /votes/{id}:
     get:
-      summary: Get a vote by ID
+      summary: Получить голосование по ID
       description: Получает новое пользовательское голосование по ID.
       tags:
         - User Votes
@@ -100,7 +100,7 @@ paths:
                   error:
                     type: string
     delete:
-      summary: Delete a vote by ID
+      summary: Удалить голосование по ID
       description: Удаляет новое пользовательское голосование по ID.
       tags:
         - User Votes
@@ -133,7 +133,7 @@ paths:
                     type: string
   /votes/{id}/vote:
     post:
-      summary: Add a user vote
+      summary: Добавить голос пользователя
       description: Добавляет голос пользователя к голосованию.
       tags:
         - User Votes
@@ -176,7 +176,7 @@ paths:
                     type: string
   /votes/{id}/votes:
     get:
-      summary: Get all user votes for a vote
+      summary: Получить все голоса пользователей для голосования
       description: Получает все голоса пользователей для указанного голосования.
       tags:
         - User Votes
@@ -206,7 +206,7 @@ paths:
                     type: string
   /auth/login:
     post:
-      summary: User Login
+      summary: Вход пользователя
       description: Авторизация пользователя.
       tags:
         - Authentication
@@ -243,7 +243,7 @@ paths:
                     type: string
   /auth/me:
     get:
-      summary: Get Current User Info
+      summary: Получить информацию о текущем пользователе
       description: >
         Получение информации о текущем пользователе. **Требуется авторизация.** Пример заголовка авторизации:
         ```
@@ -287,7 +287,7 @@ paths:
                     type: string
   /api/v1/withdraw:
     post:
-      summary: Withdraw Funds
+      summary: Снять средства
       description: Снятие средств с указанием суммы и адреса.
       tags:
         - Transactions
@@ -392,6 +392,8 @@ components:
           enum: ["За", "Против"]
         vote_power:
           type: integer
+        wallet_address:
+          type: string
     VoteWithoutID:
       type: object
       required:
