@@ -40,8 +40,8 @@ func setupRouter() *gin.Engine {
 	return r
 }
 
-// Handler - экспортированная функция, которую Vercel будет использовать.
-func Handler(w http.ResponseWriter, r *http.Request) {
+// handler - экспортированная функция, которую Vercel будет использовать.
+func handler(w http.ResponseWriter, r *http.Request) {
 	router := setupRouter()
 	router.ServeHTTP(w, r)
 }
