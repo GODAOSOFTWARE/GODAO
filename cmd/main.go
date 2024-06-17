@@ -14,6 +14,9 @@ func main() {
 	// Middleware для логирования запросов
 	r.Use(requestLogger())
 
+	// Middleware для CORS
+	r.Use(corsMiddleware())
+
 	// Маршруты для голосования команды DAO
 	r.GET("/dao-team-vote-results", handlers.GetDAOTeamVoteResults)
 
@@ -53,6 +56,23 @@ func requestLogger() gin.HandlerFunc {
 			"method": c.Request.Method,
 			"path":   c.Request.URL.Path,
 		}).Info("Входящий запрос")
+		c.Next()
+	}
+}
+
+// corsMiddleware - это функция middleware, которая добавляет необходимые заголовки для разрешения CORS.
+func corsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Authorization")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
 		c.Next()
 	}
 }
