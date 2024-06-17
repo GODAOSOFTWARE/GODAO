@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "cmd/main.go",
+      "use": "@vercel/go",
+      "config": {
+        "installCommand": "GO111MODULE=on go mod download",
+        "buildCommand": "GO111MODULE=on go build -o bin/main cmd/main.go",
+        "outputDirectory": "bin"
+      }
+    }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/cmd/main.go" },
+    { "src": "/swagger/(.*)", "dest": "/swagger/$1" }
+  ]
+}

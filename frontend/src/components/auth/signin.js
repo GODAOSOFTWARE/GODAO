@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -12,6 +12,8 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Copyright(props) {
     return (
@@ -29,19 +31,47 @@ function Copyright(props) {
 const defaultTheme = createTheme();
 
 export default function SignIn() {
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        console.log({
-            email: data.get('email'),
+        const loginData = {
+            login: data.get('email'),
             password: data.get('password'),
-        });
+            device_name: "web_app", // можно изменить по необходимости
+        };
+
+        try {
+            const response = await fetch('http://localhost:8080/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(loginData),
+            });
+
+            if (response.status === 200) {
+                const result = await response.json();
+                if (result.token) {
+                    localStorage.setItem('token', result.token);
+                    toast.success('Авторизация прошла успешно');
+                } else {
+                    toast.error('Ошибка авторизации: пустой токен');
+                }
+            } else {
+                toast.error('Ошибка авторизации');
+                console.error('Ошибка авторизации:', response.statusText);
+            }
+        } catch (error) {
+            toast.error('Ошибка авторизации');
+            console.error('There was a problem with your fetch operation:', error);
+        }
     };
 
     return (
         <ThemeProvider theme={defaultTheme}>
             <Container component="main" maxWidth="xs">
                 <CssBaseline />
+                <ToastContainer position="top-right" />
                 <Box
                     sx={{
                         marginTop: 8,
