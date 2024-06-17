@@ -56,12 +56,6 @@ func setupRouter() *gin.Engine {
 	return r
 }
 
-// Handler - экспортированная функция, которую Vercel будет использовать.
-func Handler(w http.ResponseWriter, r *http.Request) {
-	router := setupRouter()
-	router.ServeHTTP(w, r)
-}
-
 // requestLogger - это функция middleware, которая логирует детали каждого запроса.
 func requestLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
