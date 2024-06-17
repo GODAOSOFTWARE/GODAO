@@ -3,12 +3,7 @@
   "builds": [
     {
       "src": "cmd/main.go",
-      "use": "@vercel/go",
-      "config": {
-        "installCommand": "GO111MODULE=on go mod download",
-        "buildCommand": "GO111MODULE=on go build -o bin/main cmd/main.go",
-        "outputDirectory": "bin"
-      }
+      "use": "@vercel/go"
     }
   ],
   "routes": [
