@@ -9,6 +9,22 @@ import (
 )
 
 func main() {
+	r := setupRouter()
+
+	// Получаем порт из переменной окружения, если не указан, используем 8080
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	// Запускаем сервер
+	if err := r.Run(":" + port); err != nil {
+		logrus.Fatalf("Не удалось запустить сервер: %v", err)
+	}
+}
+
+// setupRouter - это функция, которая настраивает маршруты и возвращает экземпляр gin.Engine.
+func setupRouter() *gin.Engine {
 	r := gin.Default()
 
 	// Middleware для логирования запросов
@@ -37,16 +53,13 @@ func main() {
 	// Маршруты для Swagger
 	r.StaticFS("/swagger", http.Dir("./swagger"))
 
-	// Получаем порт из переменной окружения, если не указан, используем 8080
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
+	return r
+}
 
-	// Запускаем сервер
-	if err := r.Run(":" + port); err != nil {
-		logrus.Fatalf("Не удалось запустить сервер: %v", err)
-	}
+// Handler - экспортированная функция, которую Vercel будет использовать.
+func Handler(w http.ResponseWriter, r *http.Request) {
+	router := setupRouter()
+	router.ServeHTTP(w, r)
 }
 
 // requestLogger - это функция middleware, которая логирует детали каждого запроса.
