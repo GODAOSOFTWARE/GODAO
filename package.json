@@ -1,5 +1,0 @@
-{
-  "scripts": {
-    "vercel-build": "GO111MODULE=on go mod download && GO111MODULE=on go build -o bin/main cmd/main.go"
-  }
-}
