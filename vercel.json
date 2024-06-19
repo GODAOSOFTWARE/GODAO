@@ -2,12 +2,12 @@
   "version": 2,
   "builds": [
     {
-      "src": "cmd/main.go",
-      "use": "@vercel/go"
+      "src": "Dockerfile",
+      "use": "@vercel/docker"
     }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "/cmd/main.go" },
+    { "src": "/api/(.*)", "dest": "/" },
     { "src": "/swagger/(.*)", "dest": "/swagger/$1" }
   ]
 }
