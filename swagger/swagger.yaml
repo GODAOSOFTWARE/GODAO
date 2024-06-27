@@ -2,6 +2,8 @@ openapi: 3.0.0
 info:
   title: GO DAO
   version: 1.0.0
+security:
+  - BearerAuth: []
 paths:
   /dao-team-vote-results:
     get:
@@ -244,11 +246,8 @@ paths:
   /auth/me:
     get:
       summary: Получить информацию о текущем пользователе
-      description: >
-        Получение информации о текущем пользователе. **Требуется авторизация.** Пример заголовка авторизации:
-        ```
-        Authorization: Bearer {token}
-        ```
+      description: |
+        Получение информации о текущем пользователе. **Требуется авторизация.** Пример заголовка авторизации: ``` Authorization: Bearer {token} ```
       tags:
         - Authentication
       parameters:
@@ -307,7 +306,7 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Withdrawal successful"
+                    example: Withdrawal successful
         '400':
           description: Неверный запрос
           content:
@@ -352,14 +351,14 @@ components:
         vote_power:
           type: integer
         hash:
-          type: string # Добавлено поле для хэша транзакции
+          type: string
     DAOTeamVoteResultsResponse:
       type: object
       properties:
         dao_members:
           type: integer
         trx_count:
-          type: integer # Обновлено: Замена поля voted_members на trx_count
+          type: integer
         turnout:
           type: string
         votes_for:
@@ -389,7 +388,9 @@ components:
           type: string
         choice:
           type: string
-          enum: ["За", "Против"]
+          enum:
+            - За
+            - Против
         vote_power:
           type: integer
         wallet_address:
@@ -405,20 +406,22 @@ components:
       properties:
         title:
           type: string
-          example: "Sample Title"
+          example: Sample Title
         subtitle:
           type: string
-          example: "Sample Subtitle"
+          example: Sample Subtitle
         description:
           type: string
-          example: "Sample Description"
+          example: Sample Description
         voter:
           type: string
-          example: "d0"
+          example: d0
         choice:
           type: string
-          enum: ["За", "Против"]
-          example: "За"
+          enum:
+            - За
+            - Против
+          example: За
     UserVote:
       type: object
       properties:
@@ -430,7 +433,9 @@ components:
           type: string
         choice:
           type: string
-          enum: ["За", "Против"]
+          enum:
+            - За
+            - Против
         vote_power:
           type: integer
     UserVoteInput:
@@ -441,11 +446,13 @@ components:
       properties:
         voter:
           type: string
-          example: "d0..."
+          example: d0...
         choice:
           type: string
-          enum: ["За", "Против"]
-          example: "За"
+          enum:
+            - За
+            - Против
+          example: За
     AuthRequest:
       type: object
       properties:
@@ -546,5 +553,3 @@ components:
           format: float
         address:
           type: string
-security:
-  - BearerAuth: []
