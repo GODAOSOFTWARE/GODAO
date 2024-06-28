@@ -11,43 +11,44 @@ import (
 )
 
 const (
-	// URL API для получения транзакций голосования команды DAO
-	daoTeamVoteResultsAPIURL = "https://mainnet-explorer-api.decimalchain.com/api/address/d01uxnm0nfuwysx64udkxel63u3xxz7et5hg6gflj/txs?limit=100&offset=0"
-	requiredMajority         = 51  // Требуемое большинство для принятия решения
-	percentFactor            = 100 // Фактор для расчета процентов
+	requiredMajority = 51  // Требуемое большинство для принятия решения
+	percentFactor    = 100 // Фактор для расчета процентов
 )
 
 // FetchDAOTeamVoteResults - функция для получения результатов голосования по адресу кошелька DAO
-func FetchDAOTeamVoteResults() (models.DAOTeamApiResponse, error) {
-	// Выполняет GET-запрос к API для получения транзакций голосования
-	resp, err := http.Get(daoTeamVoteResultsAPIURL)
+func FetchDAOTeamVoteResults(walletAddress string) (models.DAOTeamApiResponse, error) {
+	// Формируем URL для запроса
+	apiURL := fmt.Sprintf("https://mainnet-explorer-api.decimalchain.com/api/address/%s/txs?limit=100&offset=0", walletAddress)
+
+	// Выполняем GET-запрос к API для получения транзакций голосования
+	resp, err := http.Get(apiURL)
 	if err != nil {
 		return models.DAOTeamApiResponse{}, fmt.Errorf("error making request: %v", err)
 	}
 	defer resp.Body.Close()
 
-	// Проверяет, был ли запрос успешным
+	// Проверяем, был ли запрос успешным
 	if resp.StatusCode != http.StatusOK {
 		return models.DAOTeamApiResponse{}, fmt.Errorf("received non-200 response code: %d", resp.StatusCode)
 	}
 
-	// Читает тело ответа
+	// Читаем тело ответа
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return models.DAOTeamApiResponse{}, fmt.Errorf("error reading response body: %v", err)
 	}
 
-	// Парсит тело ответа в структуру apiResponse
+	// Парсим тело ответа в структуру apiResponse
 	var apiResponse models.DAOTeamApiResponse
 	if err := json.Unmarshal(body, &apiResponse); err != nil {
 		return models.DAOTeamApiResponse{}, fmt.Errorf("error unmarshalling response body: %v", err)
 	}
 
-	// Обрабатывает каждую транзакцию, добавляя силу голоса
+	// Обрабатываем каждую транзакцию, добавляя силу голоса
 	for i, result := range apiResponse.Result.Txs {
 		votePower, err := repository.GetVoteStrength(result.From)
 		if err != nil {
-			// Логирует ошибку, но продолжает обработку
+			// Логируем ошибку, но продолжаем обработку
 			fmt.Printf("Error getting vote strength for %s: %v\n", result.From, err)
 		}
 		apiResponse.Result.Txs[i].VotePower = votePower

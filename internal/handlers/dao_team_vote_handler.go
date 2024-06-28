@@ -8,8 +8,15 @@ import (
 
 // GetDAOTeamVoteResults обрабатывает GET /dao-team-vote-results запрос
 func GetDAOTeamVoteResults(c *gin.Context) {
+	// Получаем параметр wallet_address из запроса
+	walletAddress := c.Query("wallet_address")
+	if walletAddress == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "wallet_address is required"})
+		return
+	}
+
 	// Вызов сервиса для получения результатов голосования команды DAO
-	apiResponse, err := services.FetchDAOTeamVoteResults()
+	apiResponse, err := services.FetchDAOTeamVoteResults(walletAddress)
 	if err != nil {
 		// Возвращает ошибку, если не удалось получить результаты голосования
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
