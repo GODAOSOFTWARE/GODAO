@@ -16,9 +16,12 @@ const (
 )
 
 // FetchDAOTeamVoteResults - функция для получения результатов голосования по адресу кошелька DAO
-func FetchDAOTeamVoteResults(walletAddress string) (models.DAOTeamApiResponse, error) {
-	// Формируем URL для запроса
-	apiURL := fmt.Sprintf("https://mainnet-explorer-api.decimalchain.com/api/address/%s/txs?limit=100&offset=0", walletAddress)
+func FetchDAOTeamVoteResults(walletAddress string, offset int) (models.DAOTeamApiResponse, error) {
+	// Получаем значение лимита из числа членов DAO
+	limit := len(repository.GetVoteMap())
+
+	// Формируем URL для запроса с динамическими параметрами limit и offset
+	apiURL := fmt.Sprintf("https://mainnet-explorer-api.decimalchain.com/api/address/%s/txs?limit=%d&offset=%d", walletAddress, limit, offset)
 
 	// Выполняем GET-запрос к API для получения транзакций голосования
 	resp, err := http.Get(apiURL)

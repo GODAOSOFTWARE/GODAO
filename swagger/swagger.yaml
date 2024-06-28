@@ -15,7 +15,13 @@ paths:
           schema:
             type: string
           required: true
-          description: Адрес кошелька DAO
+          description: Адрес кошелька DAO для получения результатов голосования
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            required: false
+            description: Смещение от начала списка транзакций (по умолчанию 0)
       responses:
         '200':
           description: Список результатов голосования
