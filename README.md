@@ -11,7 +11,6 @@
    ├── cmd/
    │   └── main.go
    ├── dsc-example/
-   ├── frontend/
    ├── internal/
    │   ├── handlers/
    │   │   ├── auth_handler.go
