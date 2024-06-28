@@ -47,7 +47,7 @@ type DAOTeamVoteResultsResponse struct {
 	VotesAgainst      string        `json:"votes_against"`
 	VotingStatus      string        `json:"voting_status"`
 	Resolution        string        `json:"resolution"`
-	ValidTransactions []Transaction `json:"transactions"`
+	ValidTransactions []Transaction `json:"valid_transactions"`
 	RejectedTxs       []Transaction `json:"rejected_transactions"`
 	NullVotePowerTxs  []Transaction `json:"null_vote_power_transactions"`
 	InvalidMessageTxs []Transaction `json:"invalid_message_transactions"`
