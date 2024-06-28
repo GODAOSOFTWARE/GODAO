@@ -139,7 +139,7 @@ func AddUserVoteHandler(c *gin.Context) {
 		utils.JSONResponse(c, http.StatusInternalServerError, gin.H{"error": "Failed to add vote"})
 		return
 	}
-
+	
 	userVote.VoterID = id
 	utils.JSONResponse(c, http.StatusCreated, userVote)
 }

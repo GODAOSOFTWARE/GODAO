@@ -35,4 +35,5 @@ func GetDAOTeamVoteResults(c *gin.Context) {
 	voteResults := services.PrepareDAOTeamVoteResults(apiResponse)
 	// Возвращает успешный ответ с результатами голосования
 	c.JSON(http.StatusOK, voteResults)
+
 }
