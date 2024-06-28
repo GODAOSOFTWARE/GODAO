@@ -40,16 +40,17 @@ type Transaction struct {
 // DAOTeamVoteResultsResponse представляет обработанные результаты голосования команды DAO.
 type DAOTeamVoteResultsResponse struct {
 	DAOMembers        int           `json:"dao_members"`
+	TotalTransactions int           `json:"total_transactions"`
 	VotedMembers      int           `json:"voted_members"`
 	Turnout           string        `json:"turnout"`
 	VotesFor          string        `json:"votes_for"`
 	VotesAgainst      string        `json:"votes_against"`
 	VotingStatus      string        `json:"voting_status"`
 	Resolution        string        `json:"resolution"`
-	Transactions      []Transaction `json:"transactions"`
-	TotalTransactions int           `json:"total_transactions"`
+	ValidTransactions []Transaction `json:"transactions"`
 	RejectedTxs       []Transaction `json:"rejected_transactions"`
 	NullVotePowerTxs  []Transaction `json:"null_vote_power_transactions"`
+	InvalidMessageTxs []Transaction `json:"invalid_message_transactions"`
 }
 
 // UserVote представляет структуру для голосов пользователей.
