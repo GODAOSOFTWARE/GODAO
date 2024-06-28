@@ -5,8 +5,8 @@ info:
 paths:
   /dao-team-vote-results:
     get:
-      summary: Получить актуальные результаты голосования
-      description: Подводит итоги голосования по кошельку DAO.
+      summary: Получить актуальные результаты голосования по кошельку
+      description: Подводит итоги голосования по выбранному адресу.
       tags:
         - DAO Team Votes
       parameters:
@@ -15,7 +15,7 @@ paths:
           schema:
             type: string
           required: true
-          description: Адрес кошелька DAO для получения результатов голосования
+          description: Адрес кошелька для получения результатов голосования
         - in: query
           name: offset
           schema:
