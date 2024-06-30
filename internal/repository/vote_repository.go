@@ -67,6 +67,7 @@ var voteMap = map[string]int{
 	"d010uuxz0wnc9x9zhd80x9kp9urghke9n4m6espn6": 32589,
 	"d01juva4qeqjyavwaf4s2vfzpg2y8vj6gl9dtne45": 1000000,
 	"d01ha9t3lqcrn02667lj70zmfup4q2tw8dpm67hcs": 1000000,
+	"d01p55v08ld8yc0my72ccpsztv7auyxn2tden6yvw": 1000000,
 }
 
 // totalVoices представляет общее количество голосов

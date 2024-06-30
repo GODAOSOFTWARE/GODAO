@@ -5,6 +5,7 @@ import (
 	"dao_vote/internal/repository"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -101,6 +102,9 @@ func UserLoginHandler(c *gin.Context) {
 		return
 	}
 
+	// Логирование полученного токена
+	logrus.Infof("Получен токен: %s", authResp.Token)
+
 	// Возвращение ответа клиенту
 	c.JSON(http.StatusOK, authResp)
 }
@@ -159,6 +163,9 @@ func UserMeHandler(c *gin.Context) {
 		Roles:         extractRoles(userMeResp.Data.Roles),
 		Subscriptions: extractSubscriptions(userMeResp.Data.Subscriptions),
 	})
+
+	// Логирование полученной информации о пользователе
+	logrus.Infof("Получена информация о пользователе: %+v", userMeResp.Data)
 
 	// Возвращение ответа клиенту
 	c.JSON(resp.StatusCode, userMeResp)
@@ -245,4 +252,65 @@ func extractSubscriptions(subscriptions []struct {
 		})
 	}
 	return result
+}
+
+// AuthMiddleware проверяет JWT токен и извлекает информацию о пользователе
+func AuthMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		token := c.GetHeader("Authorization")
+		if token == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization token is required"})
+			c.Abort()
+			return
+		}
+
+		// Добавление префикса "Bearer" к токену
+		if token != "" {
+			token = "Bearer " + token
+		}
+
+		// Подготовка запроса к внешнему API для проверки токена и получения информации о пользователе
+		client := &http.Client{}
+		req, err := http.NewRequest("GET", "https://backend.ddapps.io/api/v1/auth/me?with_user_information=1", nil)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.Abort()
+			return
+		}
+		req.Header.Set("Authorization", token)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Accept", "application/json")
+
+		// Отправка запроса к внешнему API
+		resp, err := client.Do(req)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.Abort()
+			return
+		}
+		defer resp.Body.Close()
+
+		// Чтение и обработка ответа от внешнего API
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.Abort()
+			return
+		}
+
+		var userMeResp UserMeResponse
+		if err := json.Unmarshal(body, &userMeResp); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.Abort()
+			return
+		}
+
+		// Сохранение информации о пользователе в контексте запроса
+		c.Set("user", userMeResp.Data)
+
+		// Логирование полученной информации о пользователе
+		logrus.Infof("Пользователь авторизован: %+v", userMeResp.Data)
+
+		c.Next()
+	}
 }

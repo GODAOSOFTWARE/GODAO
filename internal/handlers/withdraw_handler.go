@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"dao_vote/internal/models"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -9,15 +10,9 @@ import (
 	"net/http"
 )
 
-// WithdrawRequest представляет структуру запроса для снятия средств
-type WithdrawRequest struct {
-	Amount  float64 `json:"amount" validate:"required"`
-	Address string  `json:"address" validate:"required"`
-}
-
 // WithdrawHandler обрабатывает запрос на снятие средств
 func WithdrawHandler(c *gin.Context) {
-	var withdrawReq WithdrawRequest
+	var withdrawReq models.WithdrawRequest
 	if err := c.ShouldBindJSON(&withdrawReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

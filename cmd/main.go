@@ -33,25 +33,30 @@ func setupRouter() *gin.Engine {
 	// Middleware для CORS
 	r.Use(corsMiddleware())
 
-	// Маршруты для голосования команды DAO
-	r.GET("/dao-team-vote-results", handlers.GetDAOTeamVoteResults)
+	// Маршруты для Swagger (должны быть доступны без авторизации)
+	r.StaticFS("/swagger", http.Dir("./swagger"))
 
-	// Маршруты для пользовательских голосований
-	r.POST("/votes", handlers.CreateVoteHandler)
-	r.GET("/votes/:id", handlers.GetVoteHandler)
-	r.DELETE("/votes/:id", handlers.DeleteVoteHandler)
-	r.POST("/votes/:id/vote", handlers.AddUserVoteHandler)
-	r.GET("/votes/:id/votes", handlers.GetUserVotesHandler)
+	// Группа маршрутов, которые требуют авторизации
+	authRoutes := r.Group("/")
+	authRoutes.Use(handlers.AuthMiddleware())
+	{
+		// Маршруты для голосования команды DAO
+		authRoutes.GET("/dao-team-vote-results", handlers.GetDAOTeamVoteResults)
 
-	// Маршруты для авторизации
+		// Маршруты для пользовательских голосований
+		authRoutes.POST("/votes", handlers.CreateVoteHandler)
+		authRoutes.GET("/votes/:id", handlers.GetVoteHandler)
+		authRoutes.DELETE("/votes/:id", handlers.DeleteVoteHandler)
+		authRoutes.POST("/votes/:id/vote", handlers.AddUserVoteHandler)
+		authRoutes.GET("/votes/:id/votes", handlers.GetUserVotesHandler)
+
+		// Маршруты для снятия средств
+		authRoutes.POST("/api/v1/withdraw", handlers.WithdrawHandler)
+	}
+
+	// Маршруты для авторизации (не требуют авторизации)
 	r.POST("/auth/login", handlers.UserLoginHandler)
 	r.GET("/auth/me", handlers.UserMeHandler)
-
-	// Маршруты для снятия средств
-	r.POST("/api/v1/withdraw", handlers.WithdrawHandler)
-
-	// Маршруты для Swagger
-	r.StaticFS("/swagger", http.Dir("./swagger"))
 
 	return r
 }

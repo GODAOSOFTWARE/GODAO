@@ -44,6 +44,8 @@ paths:
       description: Создает новое пользовательское голосование.
       tags:
         - User Votes
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -304,6 +306,8 @@ paths:
       description: Снятие средств с указанием суммы и адреса.
       tags:
         - Transactions
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -365,14 +369,14 @@ components:
         vote_power:
           type: integer
         hash:
-          type: string # Добавлено поле для хэша транзакции
+          type: string
     DAOTeamVoteResultsResponse:
       type: object
       properties:
         dao_members:
           type: integer
         trx_count:
-          type: integer # Обновлено: Замена поля voted_members на trx_count
+          type: integer
         turnout:
           type: string
         votes_for:
@@ -413,7 +417,6 @@ components:
         - title
         - subtitle
         - description
-        - voter
         - choice
       properties:
         title:
@@ -425,9 +428,6 @@ components:
         description:
           type: string
           example: "Sample Description"
-        voter:
-          type: string
-          example: "d0"
         choice:
           type: string
           enum: ["За", "Против"]
@@ -449,12 +449,8 @@ components:
     UserVoteInput:
       type: object
       required:
-        - voter
         - choice
       properties:
-        voter:
-          type: string
-          example: "d0..."
         choice:
           type: string
           enum: ["За", "Против"]

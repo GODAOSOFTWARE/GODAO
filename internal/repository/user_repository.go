@@ -19,7 +19,7 @@ type User struct {
 	Subscriptions []Subscription
 }
 
-type Subscription struct { //
+type Subscription struct {
 	ID              int
 	Tag             string
 	PlanID          int
