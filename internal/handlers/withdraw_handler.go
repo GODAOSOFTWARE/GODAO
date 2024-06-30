@@ -9,6 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 // WithdrawHandler обрабатывает запрос на снятие средств
@@ -98,85 +99,73 @@ func WithdrawHandler(c *gin.Context) {
 		return
 	}
 
-	// Запрос хэша транзакции
-	hashReqURL := fmt.Sprintf("https://backend.ddapps.io/api/v1/transactions/%d", transactionID)
-	hashReq, err := http.NewRequest("GET", hashReqURL, nil)
+	// Функция ожидания хэша транзакции
+	getTransactionHash := func(transactionID int) (string, error) {
+		hashReqURL := fmt.Sprintf("https://backend.ddapps.io/api/v1/transactions/%d", transactionID)
+		for i := 0; i < 10; i++ {
+			hashReq, err := http.NewRequest("GET", hashReqURL, nil)
+			if err != nil {
+				logrus.Errorf("Failed to create new request for transaction hash: %v", err)
+				return "", err
+			}
+			hashReq.Header.Set("Authorization", token)
+			hashReq.Header.Set("Accept", "application/json")
+
+			// Логирование запроса на получение хэша транзакции
+			logrus.Infof("Sending request to external API for transaction hash: %v", hashReqURL)
+			logrus.Infof("Request URL: %v", hashReqURL)
+			logrus.Infof("Request method: %v", hashReq.Method)
+			logrus.Infof("Request headers: %v", hashReq.Header)
+			logrus.Infof("Request ID: %d", transactionID)
+
+			hashResp, err := client.Do(hashReq)
+			if err != nil {
+				logrus.Errorf("Failed to send request to external API for transaction hash: %v", err)
+				return "", err
+			}
+			defer hashResp.Body.Close()
+
+			// Чтение и обработка ответа от внешнего API
+			hashBody, err := ioutil.ReadAll(hashResp.Body)
+			if err != nil {
+				logrus.Errorf("Failed to read response body for transaction hash: %v", err)
+				return "", err
+			}
+
+			// Логирование ответа на запрос хэша транзакции
+			logrus.Infof("Response from external API for transaction hash: %s", string(hashBody))
+			if hashResp.StatusCode != http.StatusOK {
+				logrus.Errorf("Error from external API for transaction hash: %s", string(hashBody))
+				return "", fmt.Errorf("error from external API: %s", string(hashBody))
+			}
+
+			var hashResponse struct {
+				Data struct {
+					Hash string `json:"hash"`
+				} `json:"data"`
+			}
+			if err := json.Unmarshal(hashBody, &hashResponse); err != nil {
+				logrus.Errorf("Failed to unmarshal response JSON for transaction hash: %v", err)
+				return "", err
+			}
+
+			transactionHash := hashResponse.Data.Hash
+			logrus.Infof("Transaction hash: %s", transactionHash)
+
+			if transactionHash != "" {
+				return transactionHash, nil
+			}
+
+			// Задержка перед повторной попыткой
+			time.Sleep(1 * time.Second)
+		}
+
+		return "", fmt.Errorf("transaction hash not found after multiple attempts")
+	}
+
+	transactionHash, err := getTransactionHash(transactionID)
 	if err != nil {
-		logrus.Errorf("Failed to create new request for transaction hash: %v", err)
-		// Возвращаем успешный ответ, несмотря на ошибку запроса хэша
-		c.JSON(http.StatusOK, gin.H{"message": "Withdrawal successful, but failed to retrieve transaction hash"})
-		return
-	}
-	hashReq.Header.Set("Authorization", token)
-	hashReq.Header.Set("Accept", "application/json")
-
-	// Логирование запроса на получение хэша транзакции
-	logrus.Infof("Sending request to external API for transaction hash: %v", hashReqURL)
-	logrus.Infof("Request URL: %v", hashReqURL)
-	logrus.Infof("Request method: %v", hashReq.Method)
-	logrus.Infof("Request headers: %v", hashReq.Header)
-	logrus.Infof("Request ID: %d", transactionID)
-
-	hashResp, err := client.Do(hashReq)
-	if err != nil {
-		logrus.Errorf("Failed to send request to external API for transaction hash: %v", err)
-		// Возвращаем успешный ответ, несмотря на ошибку запроса хэша
-		c.JSON(http.StatusOK, gin.H{"message": "Withdrawal successful, but failed to retrieve transaction hash"})
-		return
-	}
-	defer hashResp.Body.Close()
-
-	// Чтение и обработка ответа от внешнего API
-	hashBody, err := ioutil.ReadAll(hashResp.Body)
-	if err != nil {
-		logrus.Errorf("Failed to read response body for transaction hash: %v", err)
-		// Возвращаем успешный ответ, несмотря на ошибку запроса хэша
-		c.JSON(http.StatusOK, gin.H{"message": "Withdrawal successful, but failed to retrieve transaction hash"})
-		return
-	}
-
-	// Логирование ответа на запрос хэша транзакции
-	logrus.Infof("Response from external API for transaction hash: %s", string(hashBody))
-	if hashResp.StatusCode != http.StatusOK {
-		logrus.Errorf("Error from external API for transaction hash: %s", string(hashBody))
-		// Возвращаем успешный ответ, несмотря на ошибку запроса хэша
-		c.JSON(http.StatusOK, gin.H{"message": "Withdrawal successful, but failed to retrieve transaction hash"})
-		return
-	}
-
-	var hashResponse struct {
-		Data struct {
-			ID             int    `json:"id"`
-			UserID         int    `json:"user_id"`
-			WalletID       int    `json:"wallet_id"`
-			Amount         string `json:"amount"`
-			Payload        string `json:"payload"`
-			DecimalPayload string `json:"decimal_payload"`
-			Coin           string `json:"coin"`
-			Hash           string `json:"hash"`
-			Result         string `json:"result"`
-			Complete       bool   `json:"complete"`
-			Success        bool   `json:"success"`
-			CreatedAt      string `json:"created_at"`
-			UpdatedAt      string `json:"updated_at"`
-			Type           int    `json:"type"`
-			Calculated     int    `json:"calculated"`
-		} `json:"data"`
-	}
-	if err := json.Unmarshal(hashBody, &hashResponse); err != nil {
-		logrus.Errorf("Failed to unmarshal response JSON for transaction hash: %v", err)
-		// Возвращаем успешный ответ, несмотря на ошибку запроса хэша
-		c.JSON(http.StatusOK, gin.H{"message": "Withdrawal successful, but failed to retrieve transaction hash"})
-		return
-	}
-
-	// Логирование значений полей структуры hashResponse
-	logrus.Infof("Transaction hash response data: %+v", hashResponse.Data)
-
-	transactionHash := hashResponse.Data.Hash
-	if transactionHash == "" {
-		logrus.Error("Invalid transaction hash in response")
-		// Возвращаем успешный ответ, несмотря на ошибку запроса хэша
+		logrus.Error(err.Error())
 		c.JSON(http.StatusOK, gin.H{"message": "Withdrawal successful, but failed to retrieve transaction hash"})
 		return
 	}
