@@ -36,6 +36,10 @@ func WithdrawHandler(c *gin.Context) {
 		return
 	}
 
+	// Логирование токена и запроса на снятие средств
+	logrus.Infof("Authorization token: %s", token)
+	logrus.Infof("Withdraw request data: %s", jsonData)
+
 	// Отправка запроса на снятие средств к внешнему API
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", "https://backend.ddapps.io/api/v1/withdraw", bytes.NewBuffer(jsonData))
@@ -48,7 +52,7 @@ func WithdrawHandler(c *gin.Context) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
-	logrus.Infof("Sending request to external API for withdrawal: %v", withdrawReq)
+	logrus.Infof("Sending request to external API for withdrawal")
 	resp, err := client.Do(req)
 	if err != nil {
 		logrus.Errorf("Failed to send request to external API: %v", err)
@@ -65,6 +69,7 @@ func WithdrawHandler(c *gin.Context) {
 		return
 	}
 
+	// Логирование ответа на запрос снятия средств
 	logrus.Infof("Response from external API: %s", string(body))
 	if resp.StatusCode != http.StatusOK {
 		logrus.Errorf("Error from external API: %s", string(body))
@@ -76,7 +81,7 @@ func WithdrawHandler(c *gin.Context) {
 		Type    string `json:"type"`
 		Message string `json:"message"`
 		Data    struct {
-			TransactionID float64 `json:"transaction_id"`
+			TransactionID int `json:"transaction_id"`
 		} `json:"data"`
 	}
 	if err := json.Unmarshal(body, &withdrawResponse); err != nil {
@@ -94,7 +99,7 @@ func WithdrawHandler(c *gin.Context) {
 	}
 
 	// Запрос хэша транзакции
-	hashReqURL := fmt.Sprintf("https://backend.ddapps.io/api/v1/transaction/%d/hash", int(transactionID))
+	hashReqURL := fmt.Sprintf("https://backend.ddapps.io/api/v1/transactions/%d", transactionID)
 	hashReq, err := http.NewRequest("GET", hashReqURL, nil)
 	if err != nil {
 		logrus.Errorf("Failed to create new request for transaction hash: %v", err)
@@ -105,7 +110,13 @@ func WithdrawHandler(c *gin.Context) {
 	hashReq.Header.Set("Authorization", token)
 	hashReq.Header.Set("Accept", "application/json")
 
+	// Логирование запроса на получение хэша транзакции
 	logrus.Infof("Sending request to external API for transaction hash: %v", hashReqURL)
+	logrus.Infof("Request URL: %v", hashReqURL)
+	logrus.Infof("Request method: %v", hashReq.Method)
+	logrus.Infof("Request headers: %v", hashReq.Header)
+	logrus.Infof("Request ID: %d", transactionID)
+
 	hashResp, err := client.Do(hashReq)
 	if err != nil {
 		logrus.Errorf("Failed to send request to external API for transaction hash: %v", err)
@@ -124,6 +135,7 @@ func WithdrawHandler(c *gin.Context) {
 		return
 	}
 
+	// Логирование ответа на запрос хэша транзакции
 	logrus.Infof("Response from external API for transaction hash: %s", string(hashBody))
 	if hashResp.StatusCode != http.StatusOK {
 		logrus.Errorf("Error from external API for transaction hash: %s", string(hashBody))
@@ -133,10 +145,22 @@ func WithdrawHandler(c *gin.Context) {
 	}
 
 	var hashResponse struct {
-		Type    string `json:"type"`
-		Message string `json:"message"`
-		Data    struct {
-			Hash string `json:"hash"`
+		Data struct {
+			ID             int    `json:"id"`
+			UserID         int    `json:"user_id"`
+			WalletID       int    `json:"wallet_id"`
+			Amount         string `json:"amount"`
+			Payload        string `json:"payload"`
+			DecimalPayload string `json:"decimal_payload"`
+			Coin           string `json:"coin"`
+			Hash           string `json:"hash"`
+			Result         string `json:"result"`
+			Complete       bool   `json:"complete"`
+			Success        bool   `json:"success"`
+			CreatedAt      string `json:"created_at"`
+			UpdatedAt      string `json:"updated_at"`
+			Type           int    `json:"type"`
+			Calculated     int    `json:"calculated"`
 		} `json:"data"`
 	}
 	if err := json.Unmarshal(hashBody, &hashResponse); err != nil {
@@ -146,7 +170,9 @@ func WithdrawHandler(c *gin.Context) {
 		return
 	}
 
-	logrus.Infof("Transaction hash response JSON: %v", hashResponse)
+	// Логирование значений полей структуры hashResponse
+	logrus.Infof("Transaction hash response data: %+v", hashResponse.Data)
+
 	transactionHash := hashResponse.Data.Hash
 	if transactionHash == "" {
 		logrus.Error("Invalid transaction hash in response")
