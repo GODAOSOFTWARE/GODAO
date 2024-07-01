@@ -2,12 +2,10 @@ package handlers
 
 import (
 	"bitbucket.org/decimalteam/decimal-go-sdk/wallet"
-	"bytes"
 	"dao_vote/internal/models"
 	"dao_vote/internal/services"
 	"dao_vote/internal/utils"
 	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/sirupsen/logrus"
@@ -20,43 +18,6 @@ var validate *validator.Validate
 
 func init() {
 	validate = validator.New()
-}
-
-// sendCoins отправляет монеты с одного кошелька на другой
-func sendCoins(amount float64, from, to, token string) error {
-	withdrawReq := models.WithdrawRequest{
-		Amount:  amount,
-		Address: to,
-	}
-
-	jsonData, err := json.Marshal(withdrawReq)
-	if err != nil {
-		return err
-	}
-
-	client := &http.Client{}
-	req, err := http.NewRequest("POST", "https://backend.ddapps.io/api/v1/withdraw", bytes.NewBuffer(jsonData))
-	if err != nil {
-		return err
-	}
-
-	req.Header.Set("Authorization", token)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		body, _ := ioutil.ReadAll(resp.Body)
-		logrus.Errorf("Error from external API: %s", string(body))
-		return fmt.Errorf("failed to send coins: %s", string(body))
-	}
-
-	return nil
 }
 
 // CreateVoteHandler обрабатывает POST /votes запрос для создания нового голосования
@@ -161,7 +122,7 @@ func CreateVoteHandler(c *gin.Context) {
 		return
 	}
 	voteWithID.VotePower = votePower
-	logrus.Infof("Vote power obtained: %f", votePower)
+	logrus.Infof("Vote power obtained: %f", float64(votePower)) // Приведение к float64 для корректного форматирования
 
 	// Сохранение голосования в базе данных
 	id, err := services.CreateVote(voteWithID)
@@ -172,15 +133,6 @@ func CreateVoteHandler(c *gin.Context) {
 	}
 	voteWithID.ID = id
 	logrus.Infof("Vote saved with ID: %d", id)
-
-	// Отправка монет с кошелька пользователя на кошелек голосования
-	err = sendCoins(1, vote.Voter, account.Address(), token)
-	if err != nil {
-		utils.JSONResponse(c, http.StatusInternalServerError, gin.H{"error": "Failed to send coins"})
-		logrus.Errorf("Failed to send coins: %v", err)
-		return
-	}
-	logrus.Info("Coins sent successfully")
 
 	utils.JSONResponse(c, http.StatusCreated, voteWithID)
 	logrus.Info("CreateVoteHandler completed successfully")
