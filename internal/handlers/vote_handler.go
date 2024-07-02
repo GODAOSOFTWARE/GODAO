@@ -310,26 +310,38 @@ func initiateWithdrawal(req models.WithdrawRequest, token string) (WithdrawRespo
 	client := &http.Client{}
 	jsonData, err := json.Marshal(req)
 	if err != nil {
+		logrus.Errorf("Failed to marshal JSON: %v", err)
 		return WithdrawResponse{}, err
 	}
 
+	logrus.Infof("Initiating HTTP request for withdrawal")
 	httpReq, err := http.NewRequest("POST", "https://backend.ddapps.io/api/v1/withdraw", bytes.NewBuffer(jsonData))
 	if err != nil {
+		logrus.Errorf("Failed to create new HTTP request: %v", err)
 		return WithdrawResponse{}, err
 	}
+
 	httpReq.Header.Set("Authorization", token)
 	httpReq.Header.Set("Content-Type", "application/json")
 	httpReq.Header.Set("Accept", "application/json")
 
+	// Логгирование содержимого HTTP-запроса
+	logrus.Infof("HTTP Request - URL: %s", httpReq.URL)
+	logrus.Infof("HTTP Request - Method: %s", httpReq.Method)
+	logrus.Infof("HTTP Request - Headers: %v", httpReq.Header)
+	logrus.Infof("HTTP Request - Body: %s", jsonData)
+
 	logrus.Infof("Sending request to external API for withdrawal")
 	resp, err := client.Do(httpReq)
 	if err != nil {
+		logrus.Errorf("Failed to send request to external API: %v", err)
 		return WithdrawResponse{}, err
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		logrus.Errorf("Failed to read response body: %v", err)
 		return WithdrawResponse{}, err
 	}
 
@@ -340,6 +352,7 @@ func initiateWithdrawal(req models.WithdrawRequest, token string) (WithdrawRespo
 
 	var response WithdrawResponse
 	if err := json.Unmarshal(body, &response); err != nil {
+		logrus.Errorf("Failed to unmarshal response JSON: %v", err)
 		return WithdrawResponse{}, err
 	}
 
@@ -352,6 +365,7 @@ func getTransactionHash(transactionID int, token string) (TransactionHashRespons
 	hashReqURL := fmt.Sprintf("https://backend.ddapps.io/api/v1/transactions/%d", transactionID)
 	hashReq, err := http.NewRequest("GET", hashReqURL, nil)
 	if err != nil {
+		logrus.Errorf("Failed to create new request for transaction hash: %v", err)
 		return TransactionHashResponse{}, err
 	}
 	hashReq.Header.Set("Authorization", token)
@@ -365,12 +379,14 @@ func getTransactionHash(transactionID int, token string) (TransactionHashRespons
 
 	hashResp, err := client.Do(hashReq)
 	if err != nil {
+		logrus.Errorf("Failed to send request to external API for transaction hash: %v", err)
 		return TransactionHashResponse{}, err
 	}
 	defer hashResp.Body.Close()
 
 	hashBody, err := ioutil.ReadAll(hashResp.Body)
 	if err != nil {
+		logrus.Errorf("Failed to read response body for transaction hash: %v", err)
 		return TransactionHashResponse{}, err
 	}
 
@@ -381,6 +397,7 @@ func getTransactionHash(transactionID int, token string) (TransactionHashRespons
 
 	var hashResponse TransactionHashResponse
 	if err := json.Unmarshal(hashBody, &hashResponse); err != nil {
+		logrus.Errorf("Failed to unmarshal response JSON for transaction hash: %v", err)
 		return TransactionHashResponse{}, err
 	}
 
