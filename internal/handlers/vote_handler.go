@@ -179,29 +179,53 @@ func DeleteVoteHandler(c *gin.Context) {
 
 // AddUserVoteHandler добавляет голос пользователя к голосованию
 func AddUserVoteHandler(c *gin.Context) {
+	logrus.Info("AddUserVoteHandler started")
+
+	// Проверка ID голосования
 	voteID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		utils.JSONResponse(c, http.StatusBadRequest, gin.H{"error": "Invalid VoteID"})
 		logrus.Errorf("Invalid VoteID: %v", err)
 		return
 	}
+	logrus.Infof("VoteID: %d", voteID)
 
+	// Получение данных голосования
+	vote, err := services.GetVote(voteID)
+	if err != nil {
+		utils.JSONResponse(c, http.StatusNotFound, gin.H{"error": err.Error()})
+		logrus.Errorf("Vote not found: %v", err)
+		return
+	}
+	logrus.Infof("Vote retrieved successfully: %+v", vote)
+
+	// Сохранение кошелька голосования в памяти
+	walletAddress := vote.WalletAddress
+	logrus.Infof("Wallet address for the vote: %s", walletAddress)
+
+	// Получение силы голоса создателя голосования
+	votePower, err := services.GetVoteStrength(vote.Voter)
+	if err != nil {
+		utils.JSONResponse(c, http.StatusBadRequest, gin.H{"error": "Error determining vote strength"})
+		logrus.Errorf("Error determining vote strength: %v", err)
+		return
+	}
+	logrus.Infof("Vote power for voter %s: %d", vote.Voter, votePower)
+
+	// Получение данных голоса пользователя
 	var userVote models.UserVote
 	if err := c.BindJSON(&userVote); err != nil {
 		utils.JSONResponse(c, http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		logrus.Errorf("Invalid request body: %v", err)
 		return
 	}
+	logrus.Infof("User vote data received: %+v", userVote)
 
 	userVote.VoteID = voteID
-	votePower, err := services.GetVoteStrength(userVote.Voter)
-	if err != nil {
-		utils.JSONResponse(c, http.StatusBadRequest, gin.H{"error": "Error determining vote strength"})
-		logrus.Errorf("Error determining vote strength: %v", err)
-		return
-	}
 	userVote.VotePower = votePower
+	userVote.Voter = vote.Voter // Заполняем поле Voter в структуре UserVote
 
+	// Сохранение голоса пользователя в базе данных
 	id, err := services.AddUserVote(userVote)
 	if err != nil {
 		utils.JSONResponse(c, http.StatusInternalServerError, gin.H{"error": "Failed to add vote"})
@@ -210,8 +234,11 @@ func AddUserVoteHandler(c *gin.Context) {
 	}
 
 	userVote.VoterID = id
-	utils.JSONResponse(c, http.StatusCreated, userVote)
 	logrus.Infof("User vote added successfully: %+v", userVote)
+
+	// Ответ клиенту
+	utils.JSONResponse(c, http.StatusCreated, userVote)
+	logrus.Info("AddUserVoteHandler completed successfully")
 }
 
 // GetUserVotesHandler обрабатывает GET /votes/:id/votes запрос для получения всех голосов пользователей для голосования
