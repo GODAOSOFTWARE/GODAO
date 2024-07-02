@@ -2,16 +2,19 @@ package handlers
 
 import (
 	"bitbucket.org/decimalteam/decimal-go-sdk/wallet"
+	"bytes"
 	"dao_vote/internal/models"
 	"dao_vote/internal/services"
 	"dao_vote/internal/utils"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 var validate *validator.Validate
@@ -236,9 +239,167 @@ func AddUserVoteHandler(c *gin.Context) {
 	userVote.VoterID = id
 	logrus.Infof("User vote added successfully: %+v", userVote)
 
+	// Инициация вывода средств
+	logrus.Info("Initiating withdrawal")
+
+	amount := 1 // Установка количества средств
+	logrus.Infof("Amount for withdrawal: %d", amount)
+
+	token := c.GetHeader("Authorization")
+	if token == "" {
+		logrus.Error("Authorization token is missing")
+		utils.JSONResponse(c, http.StatusUnauthorized, gin.H{"error": "Authorization token is required"})
+		return
+	}
+	logrus.Infof("Authorization token: %s", token)
+
+	withdrawReq := models.WithdrawRequest{
+		Amount:  float64(amount),
+		Address: walletAddress,
+	}
+	logrus.Infof("Withdraw request data: %+v", withdrawReq)
+
+	// Вызов функции вывода средств
+	response, err := initiateWithdrawal(withdrawReq, token)
+	if err != nil {
+		logrus.Errorf("Failed to initiate withdrawal: %v", err)
+		utils.JSONResponse(c, http.StatusInternalServerError, gin.H{"error": "Failed to initiate withdrawal"})
+		return
+	}
+	logrus.Infof("Withdraw response: %+v", response)
+
+	transactionID := response.Data.TransactionID
+	if transactionID == 0 {
+		logrus.Error("Invalid transaction ID in response")
+		utils.JSONResponse(c, http.StatusInternalServerError, gin.H{"error": "Invalid transaction ID in response"})
+		return
+	}
+
+	// Запрос хэша транзакции
+	logrus.Infof("Waiting before requesting transaction hash")
+	time.Sleep(5 * time.Second) // Задержка 5 секунд
+
+	hashResponse, err := getTransactionHash(transactionID, token)
+	if err != nil {
+		logrus.Errorf("Failed to retrieve transaction hash: %v", err)
+		utils.JSONResponse(c, http.StatusOK, gin.H{"message": "Withdrawal successful, but failed to retrieve transaction hash"})
+		return
+	}
+	logrus.Infof("Transaction hash response: %+v", hashResponse)
+
+	transactionHash := hashResponse.Data.Hash
+	logrus.Infof("Transaction hash: %s", transactionHash)
+
+	if transactionHash == "" {
+		logrus.Error("Invalid transaction hash in response")
+		utils.JSONResponse(c, http.StatusOK, gin.H{"message": "Withdrawal successful, but failed to retrieve transaction hash"})
+		return
+	}
+
 	// Ответ клиенту
-	utils.JSONResponse(c, http.StatusCreated, userVote)
+	utils.JSONResponse(c, http.StatusOK, gin.H{
+		"message":          "Withdrawal successful",
+		"transaction_id":   transactionID,
+		"transaction_hash": transactionHash,
+	})
 	logrus.Info("AddUserVoteHandler completed successfully")
+}
+
+// initiateWithdrawal вызывает существующую функцию вывода средств
+func initiateWithdrawal(req models.WithdrawRequest, token string) (WithdrawResponse, error) {
+	client := &http.Client{}
+	jsonData, err := json.Marshal(req)
+	if err != nil {
+		return WithdrawResponse{}, err
+	}
+
+	httpReq, err := http.NewRequest("POST", "https://backend.ddapps.io/api/v1/withdraw", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return WithdrawResponse{}, err
+	}
+	httpReq.Header.Set("Authorization", token)
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Accept", "application/json")
+
+	logrus.Infof("Sending request to external API for withdrawal")
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		return WithdrawResponse{}, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return WithdrawResponse{}, err
+	}
+
+	logrus.Infof("Response from external API: %s", string(body))
+	if resp.StatusCode != http.StatusOK {
+		return WithdrawResponse{}, fmt.Errorf("error from external API: %s", string(body))
+	}
+
+	var response WithdrawResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		return WithdrawResponse{}, err
+	}
+
+	return response, nil
+}
+
+// getTransactionHash выполняет запрос для получения хэша транзакции
+func getTransactionHash(transactionID int, token string) (TransactionHashResponse, error) {
+	client := &http.Client{}
+	hashReqURL := fmt.Sprintf("https://backend.ddapps.io/api/v1/transactions/%d", transactionID)
+	hashReq, err := http.NewRequest("GET", hashReqURL, nil)
+	if err != nil {
+		return TransactionHashResponse{}, err
+	}
+	hashReq.Header.Set("Authorization", token)
+	hashReq.Header.Set("Accept", "application/json")
+
+	logrus.Infof("Sending request to external API for transaction hash: %v", hashReqURL)
+	logrus.Infof("Request URL: %v", hashReqURL)
+	logrus.Infof("Request method: %v", hashReq.Method)
+	logrus.Infof("Request headers: %v", hashReq.Header)
+	logrus.Infof("Request ID: %d", transactionID)
+
+	hashResp, err := client.Do(hashReq)
+	if err != nil {
+		return TransactionHashResponse{}, err
+	}
+	defer hashResp.Body.Close()
+
+	hashBody, err := ioutil.ReadAll(hashResp.Body)
+	if err != nil {
+		return TransactionHashResponse{}, err
+	}
+
+	logrus.Infof("Response from external API for transaction hash: %s", string(hashBody))
+	if hashResp.StatusCode != http.StatusOK {
+		return TransactionHashResponse{}, fmt.Errorf("error from external API for transaction hash: %s", string(hashBody))
+	}
+
+	var hashResponse TransactionHashResponse
+	if err := json.Unmarshal(hashBody, &hashResponse); err != nil {
+		return TransactionHashResponse{}, err
+	}
+
+	return hashResponse, nil
+}
+
+// Структуры для обработки ответов от внешнего API
+type WithdrawResponse struct {
+	Type    string `json:"type"`
+	Message string `json:"message"`
+	Data    struct {
+		TransactionID int `json:"transaction_id"`
+	} `json:"data"`
+}
+
+type TransactionHashResponse struct {
+	Data struct {
+		Hash string `json:"hash"`
+	} `json:"data"`
 }
 
 // GetUserVotesHandler обрабатывает GET /votes/:id/votes запрос для получения всех голосов пользователей для голосования
