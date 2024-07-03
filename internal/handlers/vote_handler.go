@@ -222,7 +222,6 @@ func AddUserVoteHandler(c *gin.Context) {
 		logrus.Errorf("Invalid request body: %v", err)
 		return
 	}
-	logrus.Infof("User vote data received: %+v", userVote)
 
 	userVote.VoteID = voteID
 	userVote.VotePower = votePower
