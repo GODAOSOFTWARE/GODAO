@@ -279,10 +279,17 @@ func AddUserVoteHandler(c *gin.Context) {
 	time.Sleep(5 * time.Second) // Задержка 5 секунд
 
 	hashResponse, err := getTransactionHash(transactionID, token)
-	if err != nil {
+	if err != nil || hashResponse.Data.Hash == "" {
 		logrus.Errorf("Failed to retrieve transaction hash: %v", err)
-		utils.JSONResponse(c, http.StatusOK, gin.H{"message": "Withdrawal successful, but failed to retrieve transaction hash"})
-		return
+		logrus.Infof("Retrying to retrieve transaction hash after 5 seconds delay")
+		time.Sleep(5 * time.Second) // Повторная задержка 5 секунд
+
+		hashResponse, err = getTransactionHash(transactionID, token)
+		if err != nil {
+			logrus.Errorf("Failed to retrieve transaction hash on second attempt: %v", err)
+			utils.JSONResponse(c, http.StatusOK, gin.H{"message": "Withdrawal successful, but failed to retrieve transaction hash"})
+			return
+		}
 	}
 	logrus.Infof("Transaction hash response: %+v", hashResponse)
 
@@ -376,6 +383,7 @@ func getTransactionHash(transactionID int, token string) (TransactionHashRespons
 	logrus.Infof("Request headers: %v", hashReq.Header)
 	logrus.Infof("Request ID: %d", transactionID)
 
+	time.Sleep(5 * time.Second) // Задержка 5 секунд
 	hashResp, err := client.Do(hashReq)
 	if err != nil {
 		logrus.Errorf("Failed to send request to external API for transaction hash: %v", err)
