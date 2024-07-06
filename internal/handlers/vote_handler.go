@@ -435,13 +435,13 @@ func GetUserVotesHandler(c *gin.Context) {
 		return
 	}
 
-	userVotes, err := services.GetUserVotes(voteID)
+	voteResults, err := services.FetchUserVotes(voteID)
 	if err != nil {
-		utils.JSONResponse(c, http.StatusInternalServerError, gin.H{"error": "Failed to get user votes"})
-		logrus.Errorf("Failed to get user votes: %v", err)
+		utils.JSONResponse(c, http.StatusInternalServerError, gin.H{"error": "Failed to get vote results"})
+		logrus.Errorf("Failed to get vote results: %v", err)
 		return
 	}
 
-	utils.JSONResponse(c, http.StatusOK, userVotes)
-	logrus.Infof("User votes retrieved successfully: %+v", userVotes)
+	utils.JSONResponse(c, http.StatusOK, voteResults)
+	logrus.Infof("Vote results retrieved successfully: %+v", voteResults)
 }

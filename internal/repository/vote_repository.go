@@ -160,14 +160,3 @@ func GetUserVotes(voteID int) ([]models.UserVote, error) {
 	}
 	return votes, nil
 }
-
-// GetUniqueVoters возвращает уникальных проголосовавших членов DAO с ненулевой силой голоса
-func GetUniqueVoters(votes []models.Transaction) map[string]bool {
-	uniqueVoters := make(map[string]bool)
-	for _, vote := range votes {
-		if vote.VotePower > 0 {
-			uniqueVoters[vote.From] = true
-		}
-	}
-	return uniqueVoters
-}
