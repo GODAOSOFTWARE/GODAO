@@ -8,7 +8,7 @@ paths:
       summary: Получить актуальные результаты голосования по кошельку
       description: Подводит итоги голосования по выбранному адресу.
       tags:
-        - DAO Team Votes
+        - Results
       parameters:
         - in: query
           name: wallet_address
@@ -43,7 +43,7 @@ paths:
       summary: Создать новое голосование
       description: Создает новое пользовательское голосование.
       tags:
-        - User Votes
+        - Votes
       security:
         - BearerAuth: []
       requestBody:
@@ -82,7 +82,7 @@ paths:
       summary: Получить голосование по ID
       description: Получает новое пользовательское голосование по ID.
       tags:
-        - User Votes
+        - Votes
       parameters:
         - name: id
           in: path
@@ -118,7 +118,7 @@ paths:
       summary: Удалить голосование по ID
       description: Удаляет новое пользовательское голосование по ID.
       tags:
-        - User Votes
+        - Votes
       parameters:
         - name: id
           in: path
@@ -151,7 +151,7 @@ paths:
       summary: Добавить голос пользователя
       description: Добавляет голос пользователя к голосованию.
       tags:
-        - User Votes
+        - Votes
       parameters:
         - name: id
           in: path
@@ -194,7 +194,7 @@ paths:
       summary: Получить все голоса пользователей для голосования
       description: Получает все голоса пользователей для указанного голосования.
       tags:
-        - User Votes
+        - Results
       parameters:
         - name: id
           in: path

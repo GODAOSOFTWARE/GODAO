@@ -422,7 +422,21 @@ type WithdrawResponse struct {
 
 type TransactionHashResponse struct {
 	Data struct {
-		Hash string `json:"hash"`
+		ID             int    `json:"id"`
+		UserID         int    `json:"user_id"`
+		WalletID       int    `json:"wallet_id"`
+		Amount         string `json:"amount"`
+		Payload        string `json:"payload"`
+		DecimalPayload string `json:"decimal_payload"`
+		Coin           string `json:"coin"`
+		Hash           string `json:"hash"`
+		Result         string `json:"result"`
+		Complete       bool   `json:"complete"`
+		Success        bool   `json:"success"`
+		CreatedAt      string `json:"created_at"`
+		UpdatedAt      string `json:"updated_at"`
+		Type           int    `json:"type"`
+		Calculated     int    `json:"calculated"`
 	} `json:"data"`
 }
 
