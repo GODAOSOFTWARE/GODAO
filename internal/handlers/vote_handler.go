@@ -88,24 +88,27 @@ func CreateVoteHandler(c *gin.Context) {
 	}
 	logrus.Info("Vote data validated")
 
-	// Создание мнемонической фразы для кошелька
-	mnemonic, err := wallet.NewMnemonic(256, "")
+	// Генерация мнемонической фразы для кошелька
+	mnemonicObject, err := wallet.NewMnemonic(256, "")
 	if err != nil {
 		utils.JSONResponse(c, http.StatusInternalServerError, gin.H{"error": "Не удалось создать мнемоническую фразу"})
 		logrus.Errorf("Failed to create mnemonic: %v", err)
 		return
 	}
+	mnemonic := mnemonicObject.Words()
+	fmt.Println("Generated Mnemonic Words:", mnemonic)
 
-	// Создание аккаунта из мнемонической фразы
-	account, err := wallet.NewAccountFromMnemonic(mnemonic)
+	// Создание аккаунта из сгенерированной мнемонической фразы
+	account, err := wallet.NewAccountFromMnemonicWords(mnemonic, "")
 	if err != nil {
 		utils.JSONResponse(c, http.StatusInternalServerError, gin.H{"error": "Не удалось создать аккаунт"})
 		logrus.Errorf("Failed to create account from mnemonic: %v", err)
 		return
 	}
+	fmt.Println("Generated Address from New Mnemonic:", account.Address())
 
 	// Логирование мнемонической фразы и адреса кошелька
-	logrus.Infof("Mnemonic: %s", mnemonic.Words())
+	logrus.Infof("Mnemonic: %s", mnemonic)
 	logrus.Infof("Wallet Address: %s", account.Address())
 
 	voteWithID := models.Vote{
