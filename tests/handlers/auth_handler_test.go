@@ -12,58 +12,49 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Тестирование сервиса авторизации
-
 // mockAuthRequest представляет тестовый запрос для авторизации
 var mockAuthRequest = handlers.AuthRequest{
-	Login:      "aleksei.ikt@gmail.com",
-	Password:   "123qweasd",
-	DeviceName: "mobile",
+	Login:      "aleksei.ikt@gmail.com", // Тестовый логин
+	Password:   "123qweasd",             // Тестовый пароль
+	DeviceName: "mobile",                // Тестовое имя устройства
 }
 
 // TestUserLoginHandler тестирует обработчик UserLoginHandler
 func TestUserLoginHandler(t *testing.T) {
-	// Создаем новый Gin роутер и регистрируем обработчик
-	router := gin.Default()
-	router.POST("/auth/login", handlers.UserLoginHandler)
+	router := gin.Default()                               // Создаем новый Gin роутер
+	router.POST("/auth/login", handlers.UserLoginHandler) // Регистрируем обработчик для маршрута POST /auth/login
 
-	// Преобразуем запрос в JSON
-	requestBody, _ := json.Marshal(mockAuthRequest)
-	req, _ := http.NewRequest("POST", "/auth/login", bytes.NewBuffer(requestBody))
-	req.Header.Set("Content-Type", "application/json")
+	requestBody, _ := json.Marshal(mockAuthRequest)                                // Преобразуем тестовый запрос в JSON
+	req, _ := http.NewRequest("POST", "/auth/login", bytes.NewBuffer(requestBody)) // Создаем новый HTTP запрос с JSON телом
+	req.Header.Set("Content-Type", "application/json")                             // Устанавливаем заголовок Content-Type
 
-	// Создаем ResponseRecorder для получения ответа
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	w := httptest.NewRecorder() // Создаем ResponseRecorder для записи ответа
+	router.ServeHTTP(w, req)    // Передаем запрос в роутер
 
-	// Проверяем статус код и ответ
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code) // Проверяем, что статус код ответа 200 OK
 
-	var response handlers.AuthResponse
-	err := json.Unmarshal(w.Body.Bytes(), &response)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, response.Token)
+	var response handlers.AuthResponse               // Объявляем переменную для хранения JSON ответа
+	err := json.Unmarshal(w.Body.Bytes(), &response) // Распаковываем JSON ответ в переменную
+	assert.NoError(t, err)                           // Проверяем, что при распаковке не возникло ошибок
+	assert.NotEmpty(t, response.Token)               // Проверяем, что в ответе присутствует поле token
 }
 
 // TestUserMeHandler тестирует обработчик UserMeHandler
 func TestUserMeHandler(t *testing.T) {
-	router := gin.Default()
-	router.GET("/auth/me", handlers.UserMeHandler)
+	router := gin.Default()                        // Создаем новый Gin роутер
+	router.GET("/auth/me", handlers.UserMeHandler) // Регистрируем обработчик для маршрута GET /auth/me
 
-	// Создаем новый запрос с токеном
-	req, _ := http.NewRequest("GET", "/auth/me", nil)
-	req.Header.Set("Authorization", "Bearer 1825|oyVzunuVE1tuwTmkkOGCfiijz9hT9nJY5fX9O7Xp")
-	req.Header.Set("Content-Type", "application/json")
+	req, _ := http.NewRequest("GET", "/auth/me", nil)                                       // Создаем новый HTTP GET запрос
+	req.Header.Set("Authorization", "Bearer 1825|oyVzunuVE1tuwTmkkOGCfiijz9hT9nJY5fX9O7Xp") // Устанавливаем заголовок Authorization
+	req.Header.Set("Content-Type", "application/json")                                      // Устанавливаем заголовок Content-Type
 
-	// Создаем ResponseRecorder для получения ответа
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
+	w := httptest.NewRecorder() // Создаем ResponseRecorder для записи ответа
+	router.ServeHTTP(w, req)    // Передаем запрос в роутер
 
-	// Проверяем статус код и ответ
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code) // Проверяем, что статус код ответа 200 OK
 
-	var response handlers.UserMeResponse
-	err := json.Unmarshal(w.Body.Bytes(), &response)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, response.Data.ID)
+	var response handlers.UserMeResponse             // Объявляем переменную для хранения JSON ответа
+	err := json.Unmarshal(w.Body.Bytes(), &response) // Распаковываем JSON ответ в переменную
+	assert.NoError(t, err)                           // Проверяем, что при распаковке не возникло ошибок
+	assert.NotEmpty(t, response.Data.ID)             // Проверяем, что в ответе присутствует поле ID
 }
