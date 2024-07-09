@@ -44,9 +44,9 @@ func TestUserMeHandler(t *testing.T) {
 	router := gin.Default()                        // Создаем новый Gin роутер
 	router.GET("/auth/me", handlers.UserMeHandler) // Регистрируем обработчик для маршрута GET /auth/me
 
-	req, _ := http.NewRequest("GET", "/auth/me", nil)                                       // Создаем новый HTTP GET запрос
-	req.Header.Set("Authorization", "Bearer 1825|oyVzunuVE1tuwTmkkOGCfiijz9hT9nJY5fX9O7Xp") // Устанавливаем заголовок Authorization
-	req.Header.Set("Content-Type", "application/json")                                      // Устанавливаем заголовок Content-Type
+	req, _ := http.NewRequest("GET", "/auth/me", nil)  // Создаем новый HTTP GET запрос
+	req.Header.Set("Authorization", "Bearer ")         // Устанавливаем заголовок Authorization
+	req.Header.Set("Content-Type", "application/json") // Устанавливаем заголовок Content-Type
 
 	w := httptest.NewRecorder() // Создаем ResponseRecorder для записи ответа
 	router.ServeHTTP(w, req)    // Передаем запрос в роутер

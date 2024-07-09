@@ -25,10 +25,10 @@ func TestWithdrawHandler(t *testing.T) {
 	router := gin.Default()                                   // Создаем новый роутер Gin
 	router.POST("/api/v1/withdraw", handlers.WithdrawHandler) // Регистрируем обработчик для маршрута POST /api/v1/withdraw
 
-	requestBody, _ := json.Marshal(mockWithdrawRequest)                                     // Преобразуем тестовый запрос в JSON
-	req, _ := http.NewRequest("POST", "/api/v1/withdraw", bytes.NewBuffer(requestBody))     // Создаем новый HTTP запрос с JSON телом
-	req.Header.Set("Content-Type", "application/json")                                      // Устанавливаем заголовок Content-Type
-	req.Header.Set("Authorization", "Bearer 1825|oyVzunuVE1tuwTmkkOGCfiijz9hT9nJY5fX9O7Xp") // Устанавливаем заголовок Authorization
+	requestBody, _ := json.Marshal(mockWithdrawRequest)                                 // Преобразуем тестовый запрос в JSON
+	req, _ := http.NewRequest("POST", "/api/v1/withdraw", bytes.NewBuffer(requestBody)) // Создаем новый HTTP запрос с JSON телом
+	req.Header.Set("Content-Type", "application/json")                                  // Устанавливаем заголовок Content-Type
+	req.Header.Set("Authorization", "Bearer ")                                          // Устанавливаем заголовок Authorization
 
 	w := httptest.NewRecorder() // Создаем ResponseRecorder для записи ответа
 	router.ServeHTTP(w, req)    // Передаем запрос в роутер

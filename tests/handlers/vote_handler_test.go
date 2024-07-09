@@ -39,7 +39,7 @@ func TestCreateVoteHandler(t *testing.T) {
 
 	req, _ := http.NewRequest("POST", "/votes", strings.NewReader(mockVoteRequest.Encode())) // Создаем новый HTTP запрос с данными формы
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")                      // Устанавливаем заголовок Content-Type
-	req.Header.Set("Authorization", "Bearer 1825|oyVzunuVE1tuwTmkkOGCfiijz9hT9nJY5fX9O7Xp")  // Устанавливаем заголовок Authorization
+	req.Header.Set("Authorization", "Bearer ")                                               // Устанавливаем заголовок Authorization
 
 	w := httptest.NewRecorder() // Создаем ResponseRecorder для записи ответа
 	router.ServeHTTP(w, req)    // Передаем запрос в роутер
