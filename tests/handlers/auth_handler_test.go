@@ -2,18 +2,19 @@ package handlers_test
 
 import (
 	"bytes"
-	"dao_vote/internal/handlers"
 	"encoding/json"
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"dao_vote/internal/handlers"
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 )
 
 // mockAuthRequest представляет тестовый запрос для авторизации
 var mockAuthRequest = handlers.AuthRequest{
-	Login:      "aleksei.ikt@gmail.com ",
+	Login:      "aleksei.ikt@gmail.com",
 	Password:   "123qweasd",
 	DeviceName: "mobile",
 }
@@ -40,4 +41,27 @@ func TestUserLoginHandler(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, response.Token)
+}
+
+// TestUserMeHandler тестирует обработчик UserMeHandler
+func TestUserMeHandler(t *testing.T) {
+	router := gin.Default()
+	router.GET("/auth/me", handlers.UserMeHandler)
+
+	// Создаем новый запрос с фиктивным токеном
+	req, _ := http.NewRequest("GET", "/auth/me", nil)
+	req.Header.Set("Authorization", "Bearer 1825|oyVzunuVE1tuwTmkkOGCfiijz9hT9nJY5fX9O7Xp")
+	req.Header.Set("Content-Type", "application/json")
+
+	// Создаем ResponseRecorder для получения ответа
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	// Проверяем статус код и ответ
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response handlers.UserMeResponse
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, response.Data.ID)
 }
