@@ -12,6 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Тестирование сервиса авторизации
+
 // mockAuthRequest представляет тестовый запрос для авторизации
 var mockAuthRequest = handlers.AuthRequest{
 	Login:      "aleksei.ikt@gmail.com",
