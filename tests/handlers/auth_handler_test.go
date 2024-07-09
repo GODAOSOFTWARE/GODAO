@@ -4,12 +4,11 @@ import (
 	"bytes"
 	"dao_vote/internal/handlers"
 	"encoding/json"
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
 )
 
 // mockAuthRequest представляет тестовый запрос для авторизации
