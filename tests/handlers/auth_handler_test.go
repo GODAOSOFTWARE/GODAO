@@ -14,9 +14,9 @@ import (
 
 // mockAuthRequest представляет тестовый запрос для авторизации
 var mockAuthRequest = handlers.AuthRequest{
-	Login:      "aleksei.ikt@gmail.com", // Тестовый логин
-	Password:   "123qweasd",             // Тестовый пароль
-	DeviceName: "mobile",                // Тестовое имя устройства
+	Login:      "email",                    // Тестовый логин
+	Password:   "password (min 6 letters)", // Тестовый пароль
+	DeviceName: "your device",              // Тестовое имя устройства
 }
 
 // TestUserLoginHandler тестирует обработчик UserLoginHandler
