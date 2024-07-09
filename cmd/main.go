@@ -1,7 +1,7 @@
 package main
 
 import (
-	"dao_vote/internal/handlers"
+	"dao_vote/back-end/handlers"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"net/http"

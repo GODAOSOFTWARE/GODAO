@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"bytes"
-	"dao_vote/internal/repository"
+	"dao_vote/back-end/repository"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"

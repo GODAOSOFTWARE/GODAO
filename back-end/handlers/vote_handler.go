@@ -3,9 +3,9 @@ package handlers
 import (
 	"bitbucket.org/decimalteam/decimal-go-sdk/wallet"
 	"bytes"
-	"dao_vote/internal/models"
-	"dao_vote/internal/services"
-	"dao_vote/internal/utils"
+	"dao_vote/back-end/models"
+	"dao_vote/back-end/services"
+	"dao_vote/back-end/utils"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"

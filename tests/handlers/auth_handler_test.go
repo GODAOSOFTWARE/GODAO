@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"dao_vote/internal/handlers"
+	"dao_vote/back-end/handlers"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )

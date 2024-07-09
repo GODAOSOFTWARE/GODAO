@@ -1,8 +1,8 @@
 package services
 
 import (
-	"dao_vote/internal/models"
-	"dao_vote/internal/repository"
+	"dao_vote/back-end/models"
+	"dao_vote/back-end/repository"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"

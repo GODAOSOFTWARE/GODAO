@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"bytes"
-	"dao_vote/internal/models"
+	"dao_vote/back-end/models"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"

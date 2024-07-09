@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"dao_vote/internal/services"
+	"dao_vote/back-end/services"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"

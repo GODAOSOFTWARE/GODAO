@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"dao_vote/internal/models"
+	"dao_vote/back-end/models"
 	"errors"
 	"sync"
 )

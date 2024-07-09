@@ -4,8 +4,8 @@ package handlers_test
 
 import (
 	"bytes"
-	"dao_vote/internal/handlers"
-	"dao_vote/internal/models"
+	"dao_vote/back-end/handlers"
+	"dao_vote/back-end/models"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
