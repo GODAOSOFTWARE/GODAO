@@ -1,5 +1,3 @@
-// tests/handlers/vote_handler_test.go
-// update
 package handlers_test
 
 import (
@@ -9,24 +7,26 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
 
-var mockVoteRequest = map[string]string{
-	"title":       "Test Vote",
-	"subtitle":    "Test Subtitle",
-	"description": "Test Description",
-	"choice":      "За",
+var mockVoteRequest = url.Values{
+	"title":       {"Голосование №1"},
+	"subtitle":    {"Суть предложения"},
+	"description": {"Подробное описание"},
+	"choice":      {"За"},
 }
 
 var mockUserVoteRequest = models.UserVote{
 	VoteID:    1,
-	Voter:     "test_voter",
+	Voter:     "d01p55v08ld8yc0my72ccpsztv7auyxn2tden6yvw",
 	Choice:    "За",
-	VotePower: 100,
+	VotePower: 1000000,
 }
 
 func TestCreateVoteHandler(t *testing.T) {
@@ -34,14 +34,16 @@ func TestCreateVoteHandler(t *testing.T) {
 	router := gin.Default()
 	router.POST("/votes", handlers.CreateVoteHandler)
 
-	requestBody, _ := json.Marshal(mockVoteRequest)
-	req, _ := http.NewRequest("POST", "/votes", bytes.NewBuffer(requestBody))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer testtoken")
+	// Создаем новый запрос с данными формы
+	req, _ := http.NewRequest("POST", "/votes", strings.NewReader(mockVoteRequest.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Authorization", "Bearer 1825|oyVzunuVE1tuwTmkkOGCfiijz9hT9nJY5fX9O7Xp")
 
+	// Создаем ResponseRecorder для получения ответа
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
+	// Проверяем статус код и ответ
 	assert.Equal(t, http.StatusCreated, w.Code)
 
 	var response models.Vote

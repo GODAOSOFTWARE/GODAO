@@ -41,6 +41,7 @@ func TestUserLoginHandler(t *testing.T) {
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, response.Token)
+
 }
 
 // TestUserMeHandler тестирует обработчик UserMeHandler
@@ -48,7 +49,7 @@ func TestUserMeHandler(t *testing.T) {
 	router := gin.Default()
 	router.GET("/auth/me", handlers.UserMeHandler)
 
-	// Создаем новый запрос с фиктивным токеном
+	// Создаем новый запрос с  токеном
 	req, _ := http.NewRequest("GET", "/auth/me", nil)
 	req.Header.Set("Authorization", "Bearer 1825|oyVzunuVE1tuwTmkkOGCfiijz9hT9nJY5fX9O7Xp")
 	req.Header.Set("Content-Type", "application/json")
