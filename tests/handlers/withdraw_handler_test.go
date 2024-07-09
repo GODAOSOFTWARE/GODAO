@@ -1,5 +1,5 @@
 // tests/handlers/withdraw_handler_test.go
-// update
+
 package handlers_test
 
 import (
@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Тестирование сервиса вывода средств
 var mockWithdrawRequest = models.WithdrawRequest{
 	Amount:  1.0,
 	Address: "d01juva4qeqjyavwaf4s2vfzpg2y8vj6gl9dtne45",
