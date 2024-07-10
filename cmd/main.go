@@ -2,6 +2,7 @@ package main
 
 import (
 	"dao_vote/back-end/handlers"
+	"dao_vote/back-end/repository"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -9,7 +10,12 @@ import (
 )
 
 func main() {
-	r := setupRouter()
+	// Инициализация базы данных
+	if err := repository.InitDB("./votes.db"); err != nil {
+		logrus.Fatalf("Не удалось инициализировать базу данных: %v", err)
+	}
+
+	r := setupRouter() // Настраиваем маршруты
 
 	// Получаем порт из переменной окружения, если не указан, используем 8080
 	port := os.Getenv("PORT")
