@@ -14,7 +14,7 @@ var db *sql.DB
 var voteMap = map[string]int{
 	// (данные карты)
 	"d016nnqrut83vd0p4afp6546rma6g5d8aqy6t7cfp": 1287398,
-	// (остальные данные)
+
 	"d01p55v08ld8yc0my72ccpsztv7auyxn2tden6yvw": 1000000,
 }
 
