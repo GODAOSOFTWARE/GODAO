@@ -18,13 +18,22 @@ var voteMap = map[string]int{
 	"d01p55v08ld8yc0my72ccpsztv7auyxn2tden6yvw": 1000000,
 }
 
-// GetVoteStrength возвращает силу голоса для указанного кошелька
-func GetVoteStrength(from string) (int, error) {
-	strength, exists := voteMap[from]
-	if !exists {
-		return 0, errors.New("сторонний голос")
+// GetVoteStrength возвращает силу голоса для указанного кошелька из базы данных
+func GetVoteStrength(walletAddress string) (int, error) {
+	var votePower int
+	err := db.QueryRow("SELECT vote_power FROM vote_strength WHERE wallet_address = ?", walletAddress).Scan(&votePower)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// Если адрес не найден в базе данных, попробуем найти его в карте voteMap
+			strength, exists := voteMap[walletAddress]
+			if !exists {
+				return 0, errors.New("сторонний голос")
+			}
+			return strength, nil
+		}
+		return 0, err
 	}
-	return strength, nil
+	return votePower, nil
 }
 
 // GetVoteMap возвращает карту всех голосов
