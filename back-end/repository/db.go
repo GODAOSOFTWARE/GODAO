@@ -42,5 +42,16 @@ func InitDB(dataSourceName string) error {
 		return err
 	}
 
+	// Создаем таблицу для силы голосов кошельков, если она не существует
+	createVoteStrengthTable := `
+	CREATE TABLE IF NOT EXISTS vote_strength (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		wallet_address TEXT UNIQUE,
+		vote_power INTEGER
+	);`
+	if _, err := db.Exec(createVoteStrengthTable); err != nil {
+		return err
+	}
+
 	return nil
 }
