@@ -34,6 +34,18 @@ func GetVoteStrength(walletAddress string) (int, error) {
 	return votePower, nil
 }
 
+// AddWalletStrength добавляет новый адрес кошелька и силу голоса в базу данных
+func AddWalletStrength(walletAddress string, votePower int) error {
+	_, err := db.Exec("INSERT INTO vote_strength (wallet_address, vote_power) VALUES (?, ?)", walletAddress, votePower)
+	return err
+}
+
+// DeleteWalletStrength удаляет адрес кошелька и силу голоса из базы данных
+func DeleteWalletStrength(walletAddress string) error {
+	_, err := db.Exec("DELETE FROM vote_strength WHERE wallet_address = ?", walletAddress)
+	return err
+}
+
 // GetVoteMap возвращает карту всех голосов
 func GetVoteMap() map[string]int {
 	return voteMap

@@ -352,6 +352,79 @@ paths:
                 properties:
                   error:
                     type: string
+  /wallets:
+    post:
+      summary: Добавить кошелек и силу голоса
+      description: Добавляет новый адрес кошелька и силу голоса в базу данных.
+      tags:
+        - Admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletStrength'
+      responses:
+        '201':
+          description: Кошелек добавлен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Wallet added successfully"
+        '400':
+          description: Неверный ввод
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  /wallets/{wallet_address}:
+    delete:
+      summary: Удалить кошелек и силу голоса
+      description: Удаляет адрес кошелька и силу голоса из базы данных.
+      tags:
+        - Admin
+      parameters:
+        - name: wallet_address
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Кошелек удален
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Wallet deleted successfully"
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
 components:
   securitySchemes:
     BearerAuth:
@@ -555,5 +628,17 @@ components:
           format: float
         address:
           type: string
+    WalletStrength:
+      type: object
+      required:
+        - wallet_address
+        - vote_power
+      properties:
+        wallet_address:
+          type: string
+          example: "d01p55v08ld8yc0my72ccpsztv7auyxn2tden6yvw"
+        vote_power:
+          type: integer
+          example: 1000000
 security:
   - BearerAuth: []

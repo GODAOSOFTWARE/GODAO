@@ -1,5 +1,3 @@
-// Package main/main.go
-
 package main
 
 import (
@@ -65,6 +63,10 @@ func setupRouter() *gin.Engine {
 	// Маршруты для авторизации (не требуют авторизации)
 	r.POST("/auth/login", handlers.UserLoginHandler)
 	r.GET("/auth/me", handlers.UserMeHandler)
+
+	// Маршруты для администрирования кошельков
+	r.POST("/wallets", handlers.AddWalletHandler)
+	r.DELETE("/wallets/:wallet_address", handlers.DeleteWalletHandler)
 
 	return r
 }
