@@ -1,3 +1,4 @@
+// Package repository Хранилище для действий связанных с голосованиями
 package repository
 
 import (
