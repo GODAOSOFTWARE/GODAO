@@ -1,3 +1,4 @@
+// Package utils Утилита для оптимизации обработчиков
 package utils
 
 import (
