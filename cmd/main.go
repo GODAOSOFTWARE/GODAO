@@ -4,6 +4,10 @@ import (
 	"dao_vote/back-end/handlers"
 	"dao_vote/back-end/repository"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/sqlite3" // Добавьте этот импорт
+	_ "github.com/golang-migrate/migrate/v4/source/file"      // Добавьте этот импорт
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"os"
@@ -14,6 +18,9 @@ func main() {
 	if err := repository.InitDB("./votes.db"); err != nil {
 		logrus.Fatalf("Не удалось инициализировать базу данных: %v", err)
 	}
+
+	// Применение миграций
+	applyMigrations()
 
 	r := setupRouter() // Настраиваем маршруты
 
@@ -27,6 +34,34 @@ func main() {
 	if err := r.Run(":" + port); err != nil {
 		logrus.Fatalf("Не удалось запустить сервер: %v", err)
 	}
+}
+
+func applyMigrations() {
+	m, err := migrate.New(
+		"file://migrations",
+		"sqlite3://./votes.db")
+	if err != nil {
+		logrus.Fatalf("Ошибка инициализации миграции: %v", err)
+	}
+
+	// Проверка и установка версии базы данных
+	version, dirty, err := m.Version()
+	if err != nil && err != migrate.ErrNilVersion {
+		logrus.Fatalf("Ошибка получения версии базы данных: %v", err)
+	}
+
+	if dirty {
+		if err := m.Force(int(version)); err != nil {
+			logrus.Fatalf("Ошибка принудительной установки версии базы данных: %v", err)
+		}
+		logrus.Infof("Принудительно установлена версия базы данных: %v", version)
+	}
+
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		logrus.Fatalf("Ошибка применения миграций: %v", err)
+	}
+
+	logrus.Info("Миграции успешно применены")
 }
 
 // setupRouter - это функция, которая настраивает маршруты и возвращает экземпляр gin.Engine.
