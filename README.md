@@ -61,6 +61,20 @@
 - `response.go`: Вспомогательные функции для работы с HTTP ответами.
 - `handlers.go`: Вспомогательные функции для обработки HTTP запросов.
 
+### Миграции (Migrations)
+
+- `0001_create_votes_table.up.sql` и `0001_create_votes_table.down.sql`: Создание и удаление таблицы голосов.
+- `0002_create_user_votes_table.up.sql` и `0002_create_user_votes_table.down.sql`: Создание и удаление таблицы пользовательских голосов.
+- `0003_create_vote_strength_table.up.sql` и `0003_create_vote_strength_table.down.sql`: Создание и удаление таблицы силы голоса.
+
+### Тесты (Tests)
+
+- `auth_handler_test.go`: Тесты для обработчика аутентификации.
+- `vote_handler_test.go`: Тесты для обработчика голосований.
+- `withdraw_handler_test.go`: Тесты для обработчика вывода средств.
+- `dao_team_vote_service_test.go`: Тесты для сервиса голосования команды DAO.
+- `vote_service_test.go`: Тесты для сервиса общих операций голосования.
+
 ## Инструкция
 
 ### Как все происходит
