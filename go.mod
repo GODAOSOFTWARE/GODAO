@@ -1,5 +1,6 @@
 module dao_vote
 
+
 go 1.22rc1
 
 require (
