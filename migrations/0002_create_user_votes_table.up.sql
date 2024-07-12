@@ -1,4 +1,4 @@
--- migrations/0002_create_user_votes_table.up.sql
+-- Функция для создания таблицы user_votes
 CREATE TABLE IF NOT EXISTS user_votes (
                                           id INTEGER PRIMARY KEY AUTOINCREMENT,
                                           vote_id INTEGER,
