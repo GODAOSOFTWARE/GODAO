@@ -83,7 +83,7 @@ func setupRouter() *gin.Engine {
 	authRoutes.Use(handlers.AuthMiddleware())
 	{
 		// Маршруты для голосования команды DAO
-		authRoutes.GET("/dao-team-vote-results", handlers.GetDAOTeamVoteResults)
+		authRoutes.GET("/get-voting-results-by-wallet", handlers.GetVotingResultsByWallet)
 
 		// Маршруты для пользовательских голосований
 		authRoutes.POST("/votes", handlers.CreateVoteHandler)

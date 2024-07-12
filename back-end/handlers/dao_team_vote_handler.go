@@ -9,8 +9,8 @@ import (
 	"strconv"
 )
 
-// / GetDAOTeamVoteResults обрабатывает GET /dao-team-vote-results запрос
-func GetDAOTeamVoteResults(c *gin.Context) {
+// GetVotingResultsByWallet обрабатывает GET /dao-team-vote-results запрос
+func GetVotingResultsByWallet(c *gin.Context) {
 	utils.HandleRequest(c, func(c *gin.Context) error {
 		// Получаем параметр wallet_address из запроса
 		walletAddress := c.Query("wallet_address")

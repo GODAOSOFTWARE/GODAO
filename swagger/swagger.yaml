@@ -4,7 +4,7 @@ info:
   title: GO DAO
   version: 1.0.0
 paths:
-  /dao-team-vote-results:
+  /get-voting-results-by-wallet:
     get:
       summary: Получить актуальные результаты голосования по кошельку
       description: Подводит итоги голосования по выбранному адресу.
@@ -39,6 +39,7 @@ paths:
                 properties:
                   error:
                     type: string
+
   /votes:
     post:
       summary: Создать новое голосование
