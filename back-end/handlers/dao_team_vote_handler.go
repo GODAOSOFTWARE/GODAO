@@ -1,3 +1,4 @@
+// Package handlers Обработчик командных голосований
 package handlers
 
 import (
