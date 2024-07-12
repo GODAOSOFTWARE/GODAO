@@ -1,4 +1,4 @@
--- migrations/0001_create_votes_table.up.sql
+-- Файл для создания таблицы votes
 CREATE TABLE votes (
                        id INTEGER PRIMARY KEY AUTOINCREMENT,
                        title TEXT,
