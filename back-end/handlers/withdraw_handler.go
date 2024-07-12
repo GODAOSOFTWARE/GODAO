@@ -1,3 +1,4 @@
+// Package handlers Обработчик снятия токенов с баланса
 package handlers
 
 import (
