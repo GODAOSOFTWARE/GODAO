@@ -25,123 +25,118 @@ func init() {
 
 // CreateVoteHandler обрабатывает POST /votes запрос для создания нового голосования
 func CreateVoteHandler(c *gin.Context) {
-	logrus.Info("CreateVoteHandler started")
+	utils.HandleRequest(c, func(c *gin.Context) error {
+		logrus.Info("CreateVoteHandler started")
 
-	// Получение токена из заголовка
-	token := c.GetHeader("Authorization")
-	if token == "" {
-		utils.JSONResponse(c, http.StatusUnauthorized, gin.H{"error": "Authorization token is required"})
-		logrus.Error("Authorization token is missing")
-		return
-	}
+		// Получение токена из заголовка
+		token := c.GetHeader("Authorization")
+		if token == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization token is required"})
+			logrus.Error("Authorization token is missing")
+			return nil
+		}
 
-	// Запрос информации о текущем пользователе
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", "https://backend.ddapps.io/api/v1/auth/me?with_user_information=1", nil)
-	if err != nil {
-		utils.JSONResponse(c, http.StatusInternalServerError, gin.H{"error": err.Error()})
-		logrus.Errorf("Failed to create request to auth/me: %v", err)
-		return
-	}
-	req.Header.Set("Authorization", token)
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
+		// Запрос информации о текущем пользователе
+		client := &http.Client{}
+		req, err := http.NewRequest("GET", "https://backend.ddapps.io/api/v1/auth/me?with_user_information=1", nil)
+		if err != nil {
+			return err
+		}
+		req.Header.Set("Authorization", token)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Accept", "application/json")
 
-	resp, err := client.Do(req)
-	if err != nil {
-		utils.JSONResponse(c, http.StatusInternalServerError, gin.H{"error": err.Error()})
-		logrus.Errorf("Failed to get response from auth/me: %v", err)
-		return
-	}
-	defer resp.Body.Close()
+		resp, err := client.Do(req)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		utils.JSONResponse(c, http.StatusInternalServerError, gin.H{"error": err.Error()})
-		logrus.Errorf("Failed to read response body from auth/me: %v", err)
-		return
-	}
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
 
-	var userMeResp UserMeResponse
-	if err := json.Unmarshal(body, &userMeResp); err != nil {
-		utils.JSONResponse(c, http.StatusInternalServerError, gin.H{"error": err.Error()})
-		logrus.Errorf("Failed to unmarshal response from auth/me: %v", err)
-		return
-	}
-	voter := userMeResp.Data.Wallet
-	logrus.Infof("Retrieved voter wallet: %s", voter)
+		var userMeResp UserMeResponse
+		if err := json.Unmarshal(body, &userMeResp); err != nil {
+			return err
+		}
+		voter := userMeResp.Data.Wallet
+		logrus.Infof("Retrieved voter wallet: %s", voter)
 
-	// Получение данных из формы
-	var vote models.VoteWithoutID
-	vote.Title = c.PostForm("title")
-	vote.Subtitle = c.PostForm("subtitle")
-	vote.Description = c.PostForm("description")
-	vote.Voter = voter
-	vote.Choice = c.PostForm("choice")
-	logrus.Infof("Form data received: %+v", vote)
+		// Получение данных из формы
+		var vote models.VoteWithoutID
+		vote.Title = c.PostForm("title")
+		vote.Subtitle = c.PostForm("subtitle")
+		vote.Description = c.PostForm("description")
+		vote.Voter = voter
+		vote.Choice = c.PostForm("choice")
+		logrus.Infof("Form data received: %+v", vote)
 
-	// Валидация данных голосования
-	if err := validate.Struct(vote); err != nil {
-		utils.JSONResponse(c, http.StatusBadRequest, gin.H{"error": err.Error()})
-		logrus.Errorf("Validation error: %v", err)
-		return
-	}
-	logrus.Info("Vote data validated")
+		// Валидация данных голосования
+		if err := validate.Struct(vote); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			logrus.Errorf("Validation error: %v", err)
+			return nil
+		}
+		logrus.Info("Vote data validated")
 
-	// Генерация мнемонической фразы для кошелька
-	mnemonicObject, err := wallet.NewMnemonic(256, "")
-	if err != nil {
-		utils.JSONResponse(c, http.StatusInternalServerError, gin.H{"error": "Не удалось создать мнемоническую фразу"})
-		logrus.Errorf("Failed to create mnemonic: %v", err)
-		return
-	}
-	mnemonic := mnemonicObject.Words()
-	fmt.Println("Generated Mnemonic Words:", mnemonic)
+		// Генерация мнемонической фразы для кошелька
+		mnemonicObject, err := wallet.NewMnemonic(256, "")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось создать мнемоническую фразу"})
+			logrus.Errorf("Failed to create mnemonic: %v", err)
+			return nil
+		}
+		mnemonic := mnemonicObject.Words()
+		fmt.Println("Generated Mnemonic Words:", mnemonic)
 
-	// Создание аккаунта из сгенерированной мнемонической фразы
-	account, err := wallet.NewAccountFromMnemonicWords(mnemonic, "")
-	if err != nil {
-		utils.JSONResponse(c, http.StatusInternalServerError, gin.H{"error": "Не удалось создать аккаунт"})
-		logrus.Errorf("Failed to create account from mnemonic: %v", err)
-		return
-	}
-	fmt.Println("Generated Address from New Mnemonic:", account.Address())
+		// Создание аккаунта из сгенерированной мнемонической фразы
+		account, err := wallet.NewAccountFromMnemonicWords(mnemonic, "")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось создать аккаунт"})
+			logrus.Errorf("Failed to create account from mnemonic: %v", err)
+			return nil
+		}
+		fmt.Println("Generated Address from New Mnemonic:", account.Address())
 
-	// Логирование мнемонической фразы и адреса кошелька
-	logrus.Infof("Mnemonic: %s", mnemonic)
-	logrus.Infof("Wallet Address: %s", account.Address())
+		// Логирование мнемонической фразы и адреса кошелька
+		logrus.Infof("Mnemonic: %s", mnemonic)
+		logrus.Infof("Wallet Address: %s", account.Address())
 
-	voteWithID := models.Vote{
-		Title:         vote.Title,
-		Subtitle:      vote.Subtitle,
-		Description:   vote.Description,
-		Voter:         vote.Voter,
-		Choice:        vote.Choice,
-		WalletAddress: account.Address(),
-	}
+		voteWithID := models.Vote{
+			Title:         vote.Title,
+			Subtitle:      vote.Subtitle,
+			Description:   vote.Description,
+			Voter:         vote.Voter,
+			Choice:        vote.Choice,
+			WalletAddress: account.Address(),
+		}
 
-	// Получение силы голоса для голосующего
-	votePower, err := services.GetVoteStrength(vote.Voter)
-	if err != nil {
-		utils.JSONResponse(c, http.StatusBadRequest, gin.H{"error": err.Error()})
-		logrus.Errorf("Failed to get vote strength: %v", err)
-		return
-	}
-	voteWithID.VotePower = votePower
-	logrus.Infof("Vote power obtained: %f", float64(votePower)) // Приведение к float64 для корректного форматирования
+		// Получение силы голоса для голосующего
+		votePower, err := services.GetVoteStrength(vote.Voter)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			logrus.Errorf("Failed to get vote strength: %v", err)
+			return nil
+		}
+		voteWithID.VotePower = votePower
+		logrus.Infof("Vote power obtained: %f", float64(votePower)) // Приведение к float64 для корректного форматирования
 
-	// Сохранение голосования в базе данных
-	id, err := services.CreateVote(voteWithID)
-	if err != nil {
-		utils.JSONResponse(c, http.StatusInternalServerError, gin.H{"error": err.Error()})
-		logrus.Errorf("Failed to create vote: %v", err)
-		return
-	}
-	voteWithID.ID = id
-	logrus.Infof("Vote saved with ID: %d", id)
+		// Сохранение голосования в базе данных
+		id, err := services.CreateVote(voteWithID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			logrus.Errorf("Failed to create vote: %v", err)
+			return nil
+		}
+		voteWithID.ID = id
+		logrus.Infof("Vote saved with ID: %d", id)
 
-	utils.JSONResponse(c, http.StatusCreated, voteWithID)
-	logrus.Info("CreateVoteHandler completed successfully")
+		c.JSON(http.StatusCreated, voteWithID)
+		logrus.Info("CreateVoteHandler completed successfully")
+		return nil
+	})
 }
 
 // GetVoteHandler получает голосование по ID
