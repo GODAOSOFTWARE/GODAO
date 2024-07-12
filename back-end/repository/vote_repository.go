@@ -11,10 +11,7 @@ import (
 var db *sql.DB
 
 // Карта силы голосов для различных кошельков
-var voteMap = map[string]int{
-	// (данные карты)
-	"d016nnqrut83vd0p4afp6546rma6g5d8aqy6t7cfp": 1287398,
-}
+var voteMap = map[string]int{}
 
 // GetVoteStrength возвращает силу голоса для указанного кошелька из базы данных
 func GetVoteStrength(walletAddress string) (int, error) {
@@ -22,12 +19,7 @@ func GetVoteStrength(walletAddress string) (int, error) {
 	err := db.QueryRow("SELECT vote_power FROM vote_strength WHERE wallet_address = ?", walletAddress).Scan(&votePower)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			// Если адрес не найден в базе данных, попробуем найти его в карте voteMap
-			strength, exists := voteMap[walletAddress]
-			if !exists {
-				return 0, errors.New("сторонний голос")
-			}
-			return strength, nil
+			return 0, errors.New("сторонний голос")
 		}
 		return 0, err
 	}
