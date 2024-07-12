@@ -5,8 +5,8 @@ import (
 	"dao_vote/back-end/repository"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/sqlite3" // Добавьте этот импорт
-	_ "github.com/golang-migrate/migrate/v4/source/file"      // Добавьте этот импорт
+	_ "github.com/golang-migrate/migrate/v4/database/sqlite3"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/sirupsen/logrus"
 	"net/http"
