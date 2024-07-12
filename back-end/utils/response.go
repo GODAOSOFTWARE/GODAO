@@ -1,3 +1,4 @@
+// Package utils Утилита для оптимизации запросов
 package utils
 
 import (
