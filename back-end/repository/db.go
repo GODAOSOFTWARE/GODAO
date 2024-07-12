@@ -1,4 +1,4 @@
-// repository/db.go
+// Структуры для работы с базой данных
 
 package repository
 
