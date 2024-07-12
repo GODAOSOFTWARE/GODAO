@@ -1,3 +1,4 @@
+// Package services Логика для корпоративного голосования
 package services
 
 import (
