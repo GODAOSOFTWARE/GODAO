@@ -1,3 +1,4 @@
+// Package repository Хранилище пользователей
 package repository
 
 import (
