@@ -46,7 +46,7 @@ func TestCreateVoteHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusCreated, w.Code) // Проверяем, что статус код ответа 201 Created
 
-	var response models.Vote                         // Объявляем переменную для хранения JSON ответа
+	var response models.VoteInfo                     // Объявляем переменную для хранения JSON ответа
 	err := json.Unmarshal(w.Body.Bytes(), &response) // Распаковываем JSON ответ в переменную
 	assert.NoError(t, err)                           // Проверяем, что при распаковке не возникло ошибок
 	assert.NotEmpty(t, response.ID)                  // Проверяем, что в ответе присутствует поле ID
@@ -65,7 +65,7 @@ func TestGetVoteHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code) // Проверяем, что статус код ответа 200 OK
 
-	var response models.Vote                         // Объявляем переменную для хранения JSON ответа
+	var response models.VoteInfo                     // Объявляем переменную для хранения JSON ответа
 	err := json.Unmarshal(w.Body.Bytes(), &response) // Распаковываем JSON ответ в переменную
 	assert.NoError(t, err)                           // Проверяем, что при распаковке не возникло ошибок
 	assert.NotEmpty(t, response.ID)                  // Проверяем, что в ответе присутствует поле ID

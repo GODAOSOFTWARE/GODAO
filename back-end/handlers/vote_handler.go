@@ -99,7 +99,7 @@ func CreateVoteHandler(c *gin.Context) {
 		logrus.Infof("Retrieved voter wallet: %s", voter)
 
 		// Получение данных из формы
-		var vote models.VoteWithoutID
+		var vote models.NewVote
 		vote.Title = c.PostForm("title")
 		vote.Subtitle = c.PostForm("subtitle")
 		vote.Description = c.PostForm("description")
@@ -113,7 +113,7 @@ func CreateVoteHandler(c *gin.Context) {
 			logrus.Errorf("Validation error: %v", err)
 			return nil
 		}
-		logrus.Info("Vote data validated")
+		logrus.Info("VoteInfo data validated")
 
 		// Генерация мнемонической фразы для кошелька
 		mnemonicObject, err := wallet.NewMnemonic(256, "")
@@ -138,7 +138,7 @@ func CreateVoteHandler(c *gin.Context) {
 		logrus.Infof("Mnemonic: %s", mnemonic)
 		logrus.Infof("Wallet Address: %s", account.Address())
 
-		voteWithID := models.Vote{
+		voteWithID := models.VoteInfo{
 			Title:         vote.Title,
 			Subtitle:      vote.Subtitle,
 			Description:   vote.Description,
@@ -155,7 +155,7 @@ func CreateVoteHandler(c *gin.Context) {
 			return nil
 		}
 		voteWithID.VotePower = votePower
-		logrus.Infof("Vote power obtained: %f", float64(votePower)) // Приведение к float64 для корректного форматирования
+		logrus.Infof("VoteInfo power obtained: %f", float64(votePower)) // Приведение к float64 для корректного форматирования
 
 		// Сохранение голосования в базе данных
 		id, err := services.CreateVote(voteWithID)
@@ -165,7 +165,7 @@ func CreateVoteHandler(c *gin.Context) {
 			return nil
 		}
 		voteWithID.ID = id
-		logrus.Infof("Vote saved with ID: %d", id)
+		logrus.Infof("VoteInfo saved with ID: %d", id)
 
 		c.JSON(http.StatusCreated, voteWithID)
 		logrus.Info("CreateVoteHandler completed successfully")
@@ -185,12 +185,12 @@ func GetVoteHandler(c *gin.Context) {
 	vote, err := services.GetVote(id)
 	if err != nil {
 		utils.JSONResponse(c, http.StatusNotFound, gin.H{"error": err.Error()})
-		logrus.Errorf("Vote not found: %v", err)
+		logrus.Errorf("VoteInfo not found: %v", err)
 		return
 	}
 
 	utils.JSONResponse(c, http.StatusOK, vote)
-	logrus.Infof("Vote retrieved successfully: %+v", vote)
+	logrus.Infof("VoteInfo retrieved successfully: %+v", vote)
 }
 
 // DeleteVoteHandler обрабатывает DELETE /votes/:id запрос для удаления голосования
@@ -209,7 +209,7 @@ func DeleteVoteHandler(c *gin.Context) {
 	}
 
 	utils.JSONResponse(c, http.StatusNoContent, gin.H{})
-	logrus.Infof("Vote deleted successfully: %d", id)
+	logrus.Infof("VoteInfo deleted successfully: %d", id)
 }
 
 // AddUserVoteHandler добавляет голос пользователя к голосованию
@@ -229,10 +229,10 @@ func AddUserVoteHandler(c *gin.Context) {
 	vote, err := services.GetVote(voteID)
 	if err != nil {
 		utils.JSONResponse(c, http.StatusNotFound, gin.H{"error": err.Error()})
-		logrus.Errorf("Vote not found: %v", err)
+		logrus.Errorf("VoteInfo not found: %v", err)
 		return
 	}
-	logrus.Infof("Vote retrieved successfully: %+v", vote)
+	logrus.Infof("VoteInfo retrieved successfully: %+v", vote)
 
 	// Сохранение кошелька голосования в памяти
 	walletAddress := vote.WalletAddress
@@ -245,7 +245,7 @@ func AddUserVoteHandler(c *gin.Context) {
 		logrus.Errorf("Error determining vote strength: %v", err)
 		return
 	}
-	logrus.Infof("Vote power for voter %s: %d", vote.Voter, votePower)
+	logrus.Infof("VoteInfo power for voter %s: %d", vote.Voter, votePower)
 
 	// Получение данных голоса пользователя
 	var userVote models.UserVote
@@ -489,5 +489,5 @@ func GetUserVotesHandler(c *gin.Context) {
 	}
 
 	utils.JSONResponse(c, http.StatusOK, voteResults)
-	logrus.Infof("Vote results retrieved successfully: %+v", voteResults)
+	logrus.Infof("VoteInfo results retrieved successfully: %+v", voteResults)
 }

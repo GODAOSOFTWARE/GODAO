@@ -33,14 +33,14 @@ func getVoteStrengthCount() (int, error) {
 }
 
 // FetchVoteResults - функция для получения результатов голосования по адресу кошелька DAO
-func FetchVoteResults(walletAddress string, offset int) (models.DAOTeamApiResponse, error) {
-	log.Printf("Fetching DAO Team Vote Results for wallet: %s with offset: %d\n", walletAddress, offset)
+func FetchVoteResults(walletAddress string, offset int) (models.WithdrawOrderResponse, error) {
+	log.Printf("Fetching DAO Team VoteInfo Results for wallet: %s with offset: %d\n", walletAddress, offset)
 
 	// Получаем количество членов ДАО
 	limit, err := getVoteStrengthCount()
 	if err != nil {
 		log.Printf("Error getting DAO members count: %v\n", err)
-		return models.DAOTeamApiResponse{}, err
+		return models.WithdrawOrderResponse{}, err
 	}
 	log.Printf("Limit set to: %d\n", limit)
 
@@ -52,29 +52,29 @@ func FetchVoteResults(walletAddress string, offset int) (models.DAOTeamApiRespon
 	resp, err := http.Get(apiURL)
 	if err != nil {
 		log.Printf("Error making request: %v\n", err)
-		return models.DAOTeamApiResponse{}, fmt.Errorf("error making request: %v", err)
+		return models.WithdrawOrderResponse{}, fmt.Errorf("error making request: %v", err)
 	}
 	defer resp.Body.Close()
 
 	// Проверяем, что ответ от сервера успешен
 	if resp.StatusCode != http.StatusOK {
 		log.Printf("Received non-200 response code: %d\n", resp.StatusCode)
-		return models.DAOTeamApiResponse{}, fmt.Errorf("received non-200 response code: %d", resp.StatusCode)
+		return models.WithdrawOrderResponse{}, fmt.Errorf("received non-200 response code: %d", resp.StatusCode)
 	}
 
 	// Читаем тело ответа
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("Error reading response body: %v\n", err)
-		return models.DAOTeamApiResponse{}, fmt.Errorf("error reading response body: %v", err)
+		return models.WithdrawOrderResponse{}, fmt.Errorf("error reading response body: %v", err)
 	}
 	log.Printf("Response body: %s\n", string(body))
 
-	// Парсим JSON-ответ в структуру DAOTeamApiResponse
-	var apiResponse models.DAOTeamApiResponse
+	// Парсим JSON-ответ в структуру WithdrawOrderResponse
+	var apiResponse models.WithdrawOrderResponse
 	if err := json.Unmarshal(body, &apiResponse); err != nil {
 		log.Printf("Error unmarshalling response body: %v\n", err)
-		return models.DAOTeamApiResponse{}, fmt.Errorf("error unmarshalling response body: %v", err)
+		return models.WithdrawOrderResponse{}, fmt.Errorf("error unmarshalling response body: %v", err)
 	}
 
 	// Обновляем силу голосов для каждой транзакции в ответе
@@ -94,7 +94,7 @@ func FetchVoteResults(walletAddress string, offset int) (models.DAOTeamApiRespon
 }
 
 // PrepareVoteResults - функция для подготовки результатов голосования команды DAO
-func PrepareVoteResults(apiResponse models.DAOTeamApiResponse) models.DAOTeamVoteResultsResponse {
+func PrepareVoteResults(apiResponse models.WithdrawOrderResponse) models.VoteResults {
 	// Инициализируем списки для различных категорий транзакций
 	validTxs := []models.Transaction{}
 	duplicateTxs := []models.Transaction{}
@@ -140,11 +140,11 @@ func PrepareVoteResults(apiResponse models.DAOTeamApiResponse) models.DAOTeamVot
 		case "да", "дa", "д", "за", "зa", "z":
 			votesFor = append(votesFor, result)
 			validTxs = append(validTxs, result)
-			log.Printf("Vote for transaction: %s", result.Hash)
+			log.Printf("VoteInfo for transaction: %s", result.Hash)
 		case "нет", "н", "против":
 			votesAgainst = append(votesAgainst, result)
 			validTxs = append(validTxs, result)
-			log.Printf("Vote against transaction: %s", result.Hash)
+			log.Printf("VoteInfo against transaction: %s", result.Hash)
 		default:
 			invalidTxs = append(invalidTxs, result)
 			log.Printf("Invalid transaction with unknown message: %s", result.Hash)
@@ -186,7 +186,7 @@ func PrepareVoteResults(apiResponse models.DAOTeamApiResponse) models.DAOTeamVot
 	log.Printf("Voting status: %s, Resolution: %s", status, resolution)
 
 	// Возвращаем результаты голосования
-	return models.DAOTeamVoteResultsResponse{
+	return models.VoteResults{
 		DAOMembers:        daoMembers,
 		VotedMembers:      len(uniqueVoters),
 		Turnout:           formatPercentage(float64(len(uniqueVoters)) / float64(daoMembers) * percentFactor),
@@ -227,12 +227,12 @@ func formatPercentage(value float64) string {
 }
 
 // CreateVote создает новое пользовательское голосование и возвращает его ID.
-func CreateVote(vote models.Vote) (int, error) {
+func CreateVote(vote models.VoteInfo) (int, error) {
 	return repository.SaveVote(vote)
 }
 
 // GetVote получает пользовательское голосование по ID.
-func GetVote(id int) (models.Vote, error) {
+func GetVote(id int) (models.VoteInfo, error) {
 	return repository.GetVoteByID(id)
 }
 
@@ -252,11 +252,11 @@ func AddUserVote(vote models.UserVote) (int, error) {
 }
 
 // FetchVotes получает результаты голосования по ID голосования
-func FetchVotes(voteID int) (models.DAOTeamVoteResultsResponse, error) {
+func FetchVotes(voteID int) (models.VoteResults, error) {
 	// Получаем голосование по ID
 	vote, err := repository.GetVoteByID(voteID)
 	if err != nil {
-		return models.DAOTeamVoteResultsResponse{}, fmt.Errorf("failed to get vote by ID: %v", err)
+		return models.VoteResults{}, fmt.Errorf("failed to get vote by ID: %v", err)
 	}
 
 	// Логируем адрес кошелька для голосования
@@ -266,23 +266,23 @@ func FetchVotes(voteID int) (models.DAOTeamVoteResultsResponse, error) {
 	apiURL := fmt.Sprintf("https://mainnet-explorer-api.decimalchain.com/api/address/%s/txs", vote.WalletAddress)
 	resp, err := http.Get(apiURL)
 	if err != nil {
-		return models.DAOTeamVoteResultsResponse{}, fmt.Errorf("error making request: %v", err)
+		return models.VoteResults{}, fmt.Errorf("error making request: %v", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return models.DAOTeamVoteResultsResponse{}, fmt.Errorf("received non-200 response code: %d", resp.StatusCode)
+		return models.VoteResults{}, fmt.Errorf("received non-200 response code: %d", resp.StatusCode)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return models.DAOTeamVoteResultsResponse{}, fmt.Errorf("error reading response body: %v", err)
+		return models.VoteResults{}, fmt.Errorf("error reading response body: %v", err)
 	}
 
 	// Парсим ответ API
-	var apiResponse models.DAOTeamApiResponse
+	var apiResponse models.WithdrawOrderResponse
 	if err := json.Unmarshal(body, &apiResponse); err != nil {
-		return models.DAOTeamVoteResultsResponse{}, fmt.Errorf("error unmarshalling response body: %v", err)
+		return models.VoteResults{}, fmt.Errorf("error unmarshalling response body: %v", err)
 	}
 
 	// Обновляем силу голосов и хэши для каждой транзакции

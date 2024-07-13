@@ -1,8 +1,8 @@
 // Package models Структуры для голосования пользователей
 package models
 
-// Vote представляет структуру для пользовательского голосования.
-type Vote struct {
+// VoteInfo представляет структуру для хранения пользовательского голосования.
+type VoteInfo struct {
 	ID             int    `json:"id"`                              // Уникальный идентификатор голосования
 	Title          string `json:"title" validate:"required"`       // Заголовок голосования
 	Subtitle       string `json:"subtitle" validate:"required"`    // Подзаголовок голосования
@@ -14,8 +14,8 @@ type Vote struct {
 	MnemonicPhrase string `json:"-"`                               // Мнемоническая фраза, скрыта в JSON-ответах
 }
 
-// VoteWithoutID представляет структуру для пользовательского голосования без VoterID.
-type VoteWithoutID struct {
+// NewVote представляет структуру для пользовательского голосования без VoterID.
+type NewVote struct {
 	Title       string `json:"title" validate:"required"`       // Заголовок голосования
 	Subtitle    string `json:"subtitle" validate:"required"`    // Подзаголовок голосования
 	Description string `json:"description" validate:"required"` // Описание предложения
@@ -23,8 +23,8 @@ type VoteWithoutID struct {
 	Choice      string `json:"choice" validate:"required"`      // Выбранный вариант голосования ("За" или "Против")
 }
 
-// DAOTeamApiResponse представляет ответ от API результатов голосования команды DAO.
-type DAOTeamApiResponse struct {
+// WithdrawOrderResponse представляет ответ от API результатов голосования команды DAO.
+type WithdrawOrderResponse struct {
 	Result struct {
 		Txs []Transaction `json:"txs"`
 	} `json:"result"`
@@ -38,8 +38,8 @@ type Transaction struct {
 	Hash      string `json:"hash"` // Добавлено поле для хэша транзакции
 }
 
-// DAOTeamVoteResultsResponse представляет обработанные результаты голосования команды DAO.
-type DAOTeamVoteResultsResponse struct {
+// VoteResults представляет обработанные результаты голосования команды DAO.
+type VoteResults struct {
 	DAOMembers        int           `json:"dao_members"`
 	TotalTransactions int           `json:"total_transactions"`
 	VotedMembers      int           `json:"voted_members"`
@@ -54,7 +54,7 @@ type DAOTeamVoteResultsResponse struct {
 	InvalidMessageTxs []Transaction `json:"invalid_message_transactions"`
 }
 
-// UserVote представляет структуру для голосов пользователей.
+// UserVote представляет структуру для голосjdfybz пользователей.
 type UserVote struct {
 	VoterID   int    `json:"id"`         // Уникальный идентификатор голоса
 	VoteID    int    `json:"vote_id"`    // VoterID голосования

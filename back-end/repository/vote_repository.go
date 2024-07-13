@@ -54,7 +54,7 @@ func GetTotalVoices() int {
 }
 
 // SaveVote сохраняет новое пользовательское голосование
-func SaveVote(vote models.Vote) (int, error) {
+func SaveVote(vote models.VoteInfo) (int, error) {
 	result, err := db.Exec("INSERT INTO votes (title, subtitle, description, voter, choice, vote_power, wallet_address) VALUES (?, ?, ?, ?, ?, ?, ?)",
 		vote.Title, vote.Subtitle, vote.Description, vote.Voter, vote.Choice, vote.VotePower, vote.WalletAddress)
 	if err != nil {
@@ -70,8 +70,8 @@ func SaveVote(vote models.Vote) (int, error) {
 }
 
 // GetVoteByID возвращает пользовательское голосование по его ID
-func GetVoteByID(id int) (models.Vote, error) {
-	var vote models.Vote
+func GetVoteByID(id int) (models.VoteInfo, error) {
+	var vote models.VoteInfo
 	err := db.QueryRow("SELECT id, title, subtitle, description, voter, choice, vote_power, wallet_address FROM votes WHERE id = ?", id).Scan(
 		&vote.ID, &vote.Title, &vote.Subtitle, &vote.Description, &vote.Voter, &vote.Choice, &vote.VotePower, &vote.WalletAddress)
 	if err != nil {
