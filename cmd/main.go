@@ -97,6 +97,7 @@ func setupRouter() *gin.Engine {
 		// Маршруты для получения названий таблиц и элементов в таблице
 		authRoutes.GET("/tables", handlers.GetTableNamesHandler)
 		authRoutes.GET("/tables/:table_name/elements", handlers.GetTableElementsHandler)
+
 	}
 
 	// Маршруты для авторизации (не требуют авторизации)

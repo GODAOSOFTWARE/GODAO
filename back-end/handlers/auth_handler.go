@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 // AuthRequest представляет структуру запроса для авторизации
@@ -322,4 +323,14 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		c.Next()
 	}
+}
+
+// Вспомогательная функция для проверки роли "admin" (нечувствительная к регистру)
+func isAdmin(user User) bool {
+	for _, role := range user.Roles {
+		if strings.ToLower(role.Name) == "admin" {
+			return true
+		}
+	}
+	return false
 }

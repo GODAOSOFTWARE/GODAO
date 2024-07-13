@@ -60,8 +60,19 @@ func DeleteWalletHandler(c *gin.Context) {
 	})
 }
 
-// Новый обработчик маршрута для получения названий таблиц
+// GetTableNamesHandler Обработчик маршрута для получения названий таблиц
 func GetTableNamesHandler(c *gin.Context) {
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authorized"})
+		return
+	}
+
+	if !isAdmin(user.(User)) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "User does not have admin privileges"})
+		return
+	}
+
 	utils.HandleRequest(c, func(c *gin.Context) error {
 		tableNames, err := repository.GetTableNames()
 		if err != nil {
@@ -75,8 +86,19 @@ func GetTableNamesHandler(c *gin.Context) {
 	})
 }
 
-// Новый обработчик маршрута для получения элементов в таблице по названию
+// GetTableElementsHandler обработчик маршрута для получения элементов в таблице по названию
 func GetTableElementsHandler(c *gin.Context) {
+	user, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authorized"})
+		return
+	}
+
+	if !isAdmin(user.(User)) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "User does not have admin privileges"})
+		return
+	}
+
 	tableName := c.Param("table_name")
 	utils.HandleRequest(c, func(c *gin.Context) error {
 		elements, err := repository.GetTableElements(tableName)
