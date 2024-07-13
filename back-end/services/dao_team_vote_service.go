@@ -34,10 +34,10 @@ func getVoteStrengthCount() (int, error) {
 func FetchDAOTeamVoteResults(walletAddress string, offset int) (models.DAOTeamApiResponse, error) {
 	log.Printf("Fetching DAO Team Vote Results for wallet: %s with offset: %d\n", walletAddress, offset)
 
-	// Получаем количество записей в таблице vote_strength
+	// Получаем количество членов ДАО
 	limit, err := getVoteStrengthCount()
 	if err != nil {
-		log.Printf("Error getting vote strength count: %v\n", err)
+		log.Printf("Error getting DAO members count: %v\n", err)
 		return models.DAOTeamApiResponse{}, err
 	}
 	log.Printf("Limit set to: %d\n", limit)
@@ -107,7 +107,7 @@ func PrepareDAOTeamVoteResults(apiResponse models.DAOTeamApiResponse) models.DAO
 	for _, result := range apiResponse.Result.Txs {
 		// Приводим сообщение к нижнему регистру и удаляем лишние пробелы и кавычки
 		message := strings.TrimSpace(strings.ToLower(result.Message))
-		message = strings.Trim(message, `"`)
+		message = strings.Trim(message, `\"`)
 
 		// Логируем детали транзакции
 		log.Printf("Processing transaction from: %s, message: %s, vote power: %d, hash: %s", result.From, message, result.VotePower, result.Hash)
@@ -171,19 +171,23 @@ func PrepareDAOTeamVoteResults(apiResponse models.DAOTeamApiResponse) models.DAO
 		resolution = "Отклонить изменения"
 	}
 
-	// Получаем карту всех голосов
-	voteMap := repository.GetVoteMap()
+	// Получаем количество членов ДАО из базы данных
+	daoMembers, err := getVoteStrengthCount()
+	if err != nil {
+		log.Printf("Error getting DAO members count: %v\n", err)
+		daoMembers = 0 // Устанавливаем 0, если возникла ошибка
+	}
 
 	// Логируем итоговые результаты
-	log.Printf("Voting completed with %d DAO members, %d voted members", len(voteMap), len(uniqueVoters))
+	log.Printf("Voting completed with %d DAO members, %d voted members", daoMembers, len(uniqueVoters))
 	log.Printf("Votes for: %d/%d (%.2f%%), Votes against: %d (%.2f%%)", strengthFor, totalVoices, percentFor, strengthAgainst, percentAgainst)
 	log.Printf("Voting status: %s, Resolution: %s", status, resolution)
 
 	// Возвращаем результаты голосования
 	return models.DAOTeamVoteResultsResponse{
-		DAOMembers:        len(voteMap),
+		DAOMembers:        daoMembers,
 		VotedMembers:      len(uniqueVoters),
-		Turnout:           formatPercentage(float64(len(uniqueVoters)) / float64(len(voteMap)) * percentFactor),
+		Turnout:           formatPercentage(float64(len(uniqueVoters)) / float64(daoMembers) * percentFactor),
 		VotesFor:          fmt.Sprintf("%d/%d (%.2f%%)", strengthFor, totalVoices, percentFor),
 		VotesAgainst:      fmt.Sprintf("%d (%.2f%%)", strengthAgainst, percentAgainst),
 		VotingStatus:      status,
