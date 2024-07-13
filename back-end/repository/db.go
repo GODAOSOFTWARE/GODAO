@@ -57,3 +57,8 @@ func InitDB(dataSourceName string) error {
 
 	return nil
 }
+
+// GetDB возвращает ссылку на базу данных
+func GetDB() *sql.DB {
+	return db
+}

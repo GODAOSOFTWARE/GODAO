@@ -17,47 +17,77 @@ const (
 	percentFactor    = 100 // Фактор для расчета процентов
 )
 
+// / Функция для получения количества записей в таблице vote_strength
+func getVoteStrengthCount() (int, error) {
+	var count int
+	query := "SELECT COUNT(*) FROM vote_strength"
+	db := repository.GetDB()
+	log.Println("Executing query to get count of vote_strength")
+	if err := db.QueryRow(query).Scan(&count); err != nil {
+		return 0, fmt.Errorf("error querying vote_strength count: %v", err)
+	}
+	log.Printf("Count of vote_strength: %d\n", count)
+	return count, nil
+}
+
 // FetchDAOTeamVoteResults - функция для получения результатов голосования по адресу кошелька DAO
 func FetchDAOTeamVoteResults(walletAddress string, offset int) (models.DAOTeamApiResponse, error) {
-	// Определяем количество транзакций для получения
-	limit := len(repository.GetVoteMap())
+	log.Printf("Fetching DAO Team Vote Results for wallet: %s with offset: %d\n", walletAddress, offset)
+
+	// Получаем количество записей в таблице vote_strength
+	limit, err := getVoteStrengthCount()
+	if err != nil {
+		log.Printf("Error getting vote strength count: %v\n", err)
+		return models.DAOTeamApiResponse{}, err
+	}
+	log.Printf("Limit set to: %d\n", limit)
+
 	// Формируем URL для запроса к API
 	apiURL := fmt.Sprintf("https://mainnet-explorer-api.decimalchain.com/api/address/%s/txs?limit=%d&offset=%d", walletAddress, limit, offset)
+	log.Printf("API URL: %s\n", apiURL)
 
 	// Выполняем GET-запрос к API
 	resp, err := http.Get(apiURL)
 	if err != nil {
+		log.Printf("Error making request: %v\n", err)
 		return models.DAOTeamApiResponse{}, fmt.Errorf("error making request: %v", err)
 	}
 	defer resp.Body.Close()
 
 	// Проверяем, что ответ от сервера успешен
 	if resp.StatusCode != http.StatusOK {
+		log.Printf("Received non-200 response code: %d\n", resp.StatusCode)
 		return models.DAOTeamApiResponse{}, fmt.Errorf("received non-200 response code: %d", resp.StatusCode)
 	}
 
 	// Читаем тело ответа
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		log.Printf("Error reading response body: %v\n", err)
 		return models.DAOTeamApiResponse{}, fmt.Errorf("error reading response body: %v", err)
 	}
+	log.Printf("Response body: %s\n", string(body))
 
 	// Парсим JSON-ответ в структуру DAOTeamApiResponse
 	var apiResponse models.DAOTeamApiResponse
 	if err := json.Unmarshal(body, &apiResponse); err != nil {
+		log.Printf("Error unmarshalling response body: %v\n", err)
 		return models.DAOTeamApiResponse{}, fmt.Errorf("error unmarshalling response body: %v", err)
 	}
 
 	// Обновляем силу голосов для каждой транзакции в ответе
 	for i, result := range apiResponse.Result.Txs {
+		log.Printf("Processing transaction from: %s\n", result.From)
 		votePower, err := repository.GetVoteStrength(result.From)
 		if err != nil {
-			fmt.Printf("Error getting vote strength for %s: %v\n", result.From, err)
+			log.Printf("Error getting vote strength for %s: %v\n", result.From, err)
 		}
 		apiResponse.Result.Txs[i].VotePower = votePower
 		apiResponse.Result.Txs[i].Hash = result.Hash
+		log.Printf("Updated transaction: %+v\n", apiResponse.Result.Txs[i])
 	}
 
+	log.Printf("Final API response: %+v\n", apiResponse)
 	return apiResponse, nil
 }
 
