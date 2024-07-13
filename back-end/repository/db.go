@@ -4,6 +4,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -61,4 +62,62 @@ func InitDB(dataSourceName string) error {
 // GetDB возвращает ссылку на базу данных
 func GetDB() *sql.DB {
 	return db
+}
+
+// Функция для получения названий всех таблиц в базе данных
+func GetTableNames() ([]string, error) {
+	rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='table'")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tableNames []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, err
+		}
+		tableNames = append(tableNames, name)
+	}
+
+	return tableNames, nil
+}
+
+// Функция для получения всех элементов из таблицы по её названию
+func GetTableElements(tableName string) ([]map[string]interface{}, error) {
+	query := fmt.Sprintf("SELECT * FROM %s", tableName)
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	columns, err := rows.Columns()
+	if err != nil {
+		return nil, err
+	}
+
+	var elements []map[string]interface{}
+	for rows.Next() {
+		columnValues := make([]interface{}, len(columns))
+		columnPointers := make([]interface{}, len(columns))
+		for i := range columnValues {
+			columnPointers[i] = &columnValues[i]
+		}
+
+		if err := rows.Scan(columnPointers...); err != nil {
+			return nil, err
+		}
+
+		element := make(map[string]interface{})
+		for i, colName := range columns {
+			val := columnPointers[i].(*interface{})
+			element[colName] = *val
+		}
+
+		elements = append(elements, element)
+	}
+
+	return elements, nil
 }

@@ -59,3 +59,34 @@ func DeleteWalletHandler(c *gin.Context) {
 		return nil
 	})
 }
+
+// Новый обработчик маршрута для получения названий таблиц
+func GetTableNamesHandler(c *gin.Context) {
+	utils.HandleRequest(c, func(c *gin.Context) error {
+		tableNames, err := repository.GetTableNames()
+		if err != nil {
+			logrus.Errorf("Failed to get table names: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get table names"})
+			return err
+		}
+
+		c.JSON(http.StatusOK, gin.H{"table_names": tableNames})
+		return nil
+	})
+}
+
+// Новый обработчик маршрута для получения элементов в таблице по названию
+func GetTableElementsHandler(c *gin.Context) {
+	tableName := c.Param("table_name")
+	utils.HandleRequest(c, func(c *gin.Context) error {
+		elements, err := repository.GetTableElements(tableName)
+		if err != nil {
+			logrus.Errorf("Failed to get elements from table %s: %v", tableName, err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get elements from table"})
+			return err
+		}
+
+		c.JSON(http.StatusOK, gin.H{"elements": elements})
+		return nil
+	})
+}

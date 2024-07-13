@@ -1,4 +1,3 @@
-
 openapi: 3.0.0
 info:
   title: GO DAO
@@ -39,7 +38,6 @@ paths:
                 properties:
                   error:
                     type: string
-
   /votes:
     post:
       summary: Создать новое голосование
@@ -223,7 +221,7 @@ paths:
                     type: string
   /auth/login:
     post:
-      summary: Вход пользователя
+      summary: Получить JWT токен
       description: Авторизация пользователя.
       tags:
         - Authentication
@@ -359,7 +357,7 @@ paths:
       summary: Добавить кошелек и силу голоса
       description: Добавляет новый адрес кошелька и силу голоса в базу данных.
       tags:
-        - Admin
+        - Wallets
       requestBody:
         required: true
         content:
@@ -400,7 +398,7 @@ paths:
       summary: Удалить кошелек и силу голоса
       description: Удаляет адрес кошелька и силу голоса из базы данных.
       tags:
-        - Admin
+        - Wallets
       parameters:
         - name: wallet_address
           in: path
@@ -420,6 +418,69 @@ paths:
                     example: "Wallet deleted successfully"
         '500':
           description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /tables:
+    get:
+      summary: "Получить названия таблиц"
+      description: "Возвращает список названий всех таблиц в базе данных"
+      tags:
+        - "Tables"
+      responses:
+        "200":
+          description: "Успешная операция"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  table_names:
+                    type: array
+                    items:
+                      type: string
+        "500":
+          description: "Ошибка сервера"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+  /tables/{table_name}/elements:
+    get:
+      summary: "Получить элементы таблицы"
+      description: "Возвращает элементы указанной таблицы"
+      tags:
+        - "Tables"
+      parameters:
+        - name: "table_name"
+          in: path
+          required: true
+          description: "Название таблицы"
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Успешная операция"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  elements:
+                    type: array
+                    items:
+                      type: object
+        "500":
+          description: "Ошибка сервера"
           content:
             application/json:
               schema:

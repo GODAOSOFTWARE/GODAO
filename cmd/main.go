@@ -1,4 +1,3 @@
-// Файл для щапуска сервера и инициализации базы данных
 package main
 
 import (
@@ -94,6 +93,10 @@ func setupRouter() *gin.Engine {
 
 		// Маршруты для снятия средств
 		authRoutes.POST("/api/v1/withdraw", handlers.WithdrawHandler)
+
+		// Маршруты для получения названий таблиц и элементов в таблице
+		authRoutes.GET("/tables", handlers.GetTableNamesHandler)
+		authRoutes.GET("/tables/:table_name/elements", handlers.GetTableElementsHandler)
 	}
 
 	// Маршруты для авторизации (не требуют авторизации)
