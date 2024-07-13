@@ -25,7 +25,39 @@ func init() {
 	validate = validator.New()
 }
 
-// CreateVoteHandler обрабатывает POST /votes запрос для создания нового голосования
+// GetVotingResultsByWallet обрабатывает GET запрос результатов голосования по кошельку
+func GetVotingResultsByWallet(c *gin.Context) {
+	utils.HandleRequest(c, func(c *gin.Context) error {
+		// Получаем параметр wallet_address из запроса
+		walletAddress := c.Query("wallet_address")
+		if walletAddress == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "wallet_address is required"})
+			return nil
+		}
+
+		// Получаем параметр offset из запроса
+		offsetStr := c.Query("offset")
+		offset, err := strconv.Atoi(offsetStr)
+		if err != nil {
+			offset = 0 // Устанавливаем значение по умолчанию, если параметр отсутствует или некорректен
+		}
+
+		// Вызов сервиса для получения результатов голосования команды DAO
+		apiResponse, err := services.FetchVoteResults(walletAddress, offset)
+		if err != nil {
+			// Возвращает ошибку, если не удалось получить результаты голосования
+			return err
+		}
+
+		// Подготовка результатов голосования для отправки в ответе
+		voteResults := services.PrepareVoteResults(apiResponse)
+		// Возвращает успешный ответ с результатами голосования
+		c.JSON(http.StatusOK, voteResults)
+		return nil
+	})
+}
+
+// CreateVoteHandler обрабатывает запрос на создание голооования
 func CreateVoteHandler(c *gin.Context) {
 	utils.HandleRequest(c, func(c *gin.Context) error {
 		logrus.Info("CreateVoteHandler started")
@@ -449,7 +481,7 @@ func GetUserVotesHandler(c *gin.Context) {
 		return
 	}
 
-	voteResults, err := services.FetchUserVotes(voteID)
+	voteResults, err := services.FetchVotes(voteID)
 	if err != nil {
 		utils.JSONResponse(c, http.StatusInternalServerError, gin.H{"error": "Failed to get vote results"})
 		logrus.Errorf("Failed to get vote results: %v", err)
