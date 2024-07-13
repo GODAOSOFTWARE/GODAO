@@ -98,15 +98,14 @@ func setupRouter() *gin.Engine {
 		authRoutes.GET("/tables", handlers.GetTableNamesHandler)
 		authRoutes.GET("/tables/:table_name/elements", handlers.GetTableElementsHandler)
 
+		// Маршруты для администрирования кошельков
+		authRoutes.POST("/wallets", handlers.AddWalletHandler)
+		authRoutes.DELETE("/wallets/:wallet_address", handlers.DeleteWalletHandler)
 	}
 
 	// Маршруты для авторизации (не требуют авторизации)
 	r.POST("/auth/login", handlers.UserLoginHandler)
 	r.GET("/auth/me", handlers.UserMeHandler)
-
-	// Маршруты для администрирования кошельков
-	r.POST("/wallets", handlers.AddWalletHandler)
-	r.DELETE("/wallets/:wallet_address", handlers.DeleteWalletHandler)
 
 	return r
 }
