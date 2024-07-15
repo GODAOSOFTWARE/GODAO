@@ -3,7 +3,7 @@
 package handlers
 
 import (
-	"bitbucket.org/decimalteam/decimal-go-sdk/wallet"
+	"bitbucket.org/decimalteam/dsc-go-sdk/wallet"
 	"bytes"
 	"dao_vote/back-end/models"
 	"dao_vote/back-end/services"
@@ -116,7 +116,7 @@ func CreateVoteHandler(c *gin.Context) {
 		logrus.Info("VoteInfo data validated")
 
 		// Генерация мнемонической фразы для кошелька
-		mnemonicObject, err := wallet.NewMnemonic(256, "")
+		mnemonicObject, err := wallet.NewMnemonic("")
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось создать мнемоническую фразу"})
 			logrus.Errorf("Failed to create mnemonic: %v", err)
